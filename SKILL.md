@@ -1,6 +1,25 @@
 ---
 name: clawarr-suite
 description: Comprehensive management for self-hosted media stacks (Sonarr, Radarr, Lidarr, Readarr, Prowlarr, Bazarr, Overseerr, Plex, Tautulli, SABnzbd, Recyclarr, Unpackerr, Notifiarr, Maintainerr, Kometa, FlareSolverr). Deep library exploration, analytics, dashboard generation, content management, request handling, subtitle management, indexer control, download monitoring, quality profile sync, library cleanup automation, notification routing, collection/overlay management, and media tracker integration (Trakt, Letterboxd, Simkl). Use when working with *arr media automation, viewing statistics, managing requests, troubleshooting imports, generating media dashboards, syncing quality profiles, cleaning up libraries, managing notifications, or creating Plex collections.
+homepage: https://github.com/omiron33/clawarr-suite
+metadata:
+  {
+    "openclaw":
+      {
+        "emoji": "🎬",
+        "requires": { "bins": ["curl", "jq"] },
+        "install":
+          [
+            {
+              "id": "brew-jq",
+              "kind": "brew",
+              "formula": "jq",
+              "bins": ["jq"],
+              "label": "Install jq (brew)",
+            },
+          ],
+      },
+  }
 ---
 
 # ClawARR Suite
