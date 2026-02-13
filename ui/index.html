@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ClawARR Suite — Setup</title>
+    <style>
+      :root { color-scheme: light dark; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+      body { margin: 24px; max-width: 980px; }
+      .card { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 16px; margin: 12px 0; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+      input, select, button, textarea { font: inherit; padding: 8px 10px; }
+      input[type=text], textarea { min-width: 320px; }
+      textarea { width: 100%; min-height: 140px; }
+      .muted { opacity: .75; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid rgba(127,127,127,.25); padding: 8px; text-align: left; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    </style>
+  </head>
+  <body>
+    <h1>ClawARR Suite</h1>
+    <p class="muted">Local onboarding wizard. This page runs inside the OpenClaw dashboard plugin host.</p>
+
+    <div class="card">
+      <h2>1) Autodiscover</h2>
+      <p class="muted">Probes standard ports on configured hosts (default: <code>localhost</code>).</p>
+      <div class="row">
+        <button id="discoverBtn">Run discovery</button>
+      </div>
+      <div id="discoverOut" class="muted" style="margin-top:10px"></div>
+      <table id="discoverTable" style="display:none; margin-top: 10px">
+        <thead><tr><th>App</th><th>Base URL</th><th>OK</th><th>Hint</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>2) Store API key (secret)</h2>
+      <p class="muted">Stores into OpenClaw secrets when available (preferred). Keys never written to the UI.</p>
+      <div class="row">
+        <select id="appSel">
+          <option value="radarr">Radarr</option>
+          <option value="sonarr">Sonarr</option>
+          <option value="lidarr">Lidarr</option>
+          <option value="readarr">Readarr</option>
+          <option value="prowlarr">Prowlarr</option>
+          <option value="bazarr">Bazarr</option>
+          <option value="overseerr">Overseerr</option>
+          <option value="plex">Plex</option>
+          <option value="tautulli">Tautulli</option>
+          <option value="sabnzbd">SABnzbd</option>
+        </select>
+        <input id="apiKey" type="text" placeholder="API key / token" />
+        <button id="saveKeyBtn">Save</button>
+      </div>
+      <div id="saveOut" class="muted" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>3) Status / test</h2>
+      <div class="row">
+        <button id="statusBtn">Fetch status</button>
+      </div>
+      <textarea id="statusOut" readonly></textarea>
+    </div>
+
+    <script>
+      async function jget(url) {
+        const r = await fetch(url);
+        return await r.json();
+      }
+      async function jpost(url, body) {
+        const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+        return await r.json();
+      }
+
+      const discoverBtn = document.getElementById('discoverBtn');
+      const discoverOut = document.getElementById('discoverOut');
+      const discoverTable = document.getElementById('discoverTable');
+      const discoverTbody = discoverTable.querySelector('tbody');
+
+      discoverBtn.onclick = async () => {
+        discoverOut.textContent = 'Running...';
+        discoverTable.style.display = 'none';
+        discoverTbody.innerHTML = '';
+        try {
+          const data = await jget('/api/clawarr/discover');
+          if (!data.ok) throw new Error(data.error || 'discover failed');
+          const rows = data.results || [];
+          for (const r of rows) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${r.app}</td><td><code>${r.baseUrl}</code></td><td>${r.ok ? 'yes' : 'no'}</td><td>${r.hint || ''}</td>`;
+            discoverTbody.appendChild(tr);
+          }
+          discoverOut.textContent = `Found ${rows.filter(r => r.ok).length} responsive endpoints (showing ${rows.length} probes).`;
+          discoverTable.style.display = '';
+        } catch (e) {
+          discoverOut.textContent = `Error: ${e.message || e}`;
+        }
+      };
+
+      const saveKeyBtn = document.getElementById('saveKeyBtn');
+      const appSel = document.getElementById('appSel');
+      const apiKey = document.getElementById('apiKey');
+      const saveOut = document.getElementById('saveOut');
+
+      saveKeyBtn.onclick = async () => {
+        saveOut.textContent = 'Saving...';
+        try {
+          const data = await jpost('/api/clawarr/secret', { app: appSel.value, apiKey: apiKey.value });
+          if (!data.ok) throw new Error(data.error || 'save failed');
+          apiKey.value = '';
+          saveOut.textContent = 'Saved.';
+        } catch (e) {
+          saveOut.textContent = `Error: ${e.message || e}`;
+        }
+      };
+
+      const statusBtn = document.getElementById('statusBtn');
+      const statusOut = document.getElementById('statusOut');
+      statusBtn.onclick = async () => {
+        statusOut.value = 'Loading...';
+        try {
+          const data = await jget('/api/clawarr/status');
+          if (!data.ok) throw new Error(data.error || 'status failed');
+          statusOut.value = data.status || '';
+        } catch (e) {
+          statusOut.value = `Error: ${e.message || e}`;
+        }
+      };
+    </script>
+  </body>
+</html>
