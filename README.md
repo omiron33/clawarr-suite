@@ -128,7 +128,17 @@ Set environment variables or use `setup.sh` to generate them:
 
 ```bash
 # Required — your server's IP or hostname
-export CLAWARR_HOST=192.168.1.100
+# Service URLs (customize as needed)
+export RADARR_URL=http://localhost:7878
+export SONARR_URL=http://localhost:8989
+export LIDARR_URL=http://localhost:8686
+export READARR_URL=http://localhost:8787
+export PROWLARR_URL=http://localhost:9696
+export BAZARR_URL=http://localhost:6767
+export OVERSEERR_URL=http://localhost:5055
+export PLEX_URL=http://localhost:32400
+export TAUTULLI_URL=http://localhost:8181
+export SABNZBD_URL=http://localhost:38080
 
 # Core services (setup.sh auto-discovers these)
 export SONARR_KEY=your_api_key

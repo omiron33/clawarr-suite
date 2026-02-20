@@ -5,7 +5,9 @@
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 DOCKER_HOST_SSH="${RECYCLARR_SSH:-}"
 DOCKER_CMD="${RECYCLARR_DOCKER_CMD:-docker}"
 CONTAINER="${RECYCLARR_CONTAINER:-recyclarr}"

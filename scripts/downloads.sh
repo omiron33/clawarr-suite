@@ -10,17 +10,17 @@
 #   resume           - Resume downloads
 #   queue            - Full queue details
 
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SABNZBD_URL="${SABNZBD_URL:-http://localhost:38080}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
-SABNZBD_KEY="${SABNZBD_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  exit 1
-fi
-
-if [[ -z "$SABNZBD_KEY" ]]; then
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+SABNZBD_KEY="${SABNZBD_KEY:-}"if [[ -z "$SABNZBD_KEY" ]]; then
   echo "❌ Error: SABNZBD_KEY not set"
   exit 1
 fi
@@ -41,7 +41,7 @@ sabnzbd_api() {
   shift
   local params="$*"
   
-  local url="http://${HOST}:38080/api?apikey=${SABNZBD_KEY}&mode=${mode}&output=json"
+  local url="${SABNZBD_URL}/api?apikey=${SABNZBD_KEY}&mode=${mode}&output=json"
   if [[ -n "$params" ]]; then
     url="${url}&${params}"
   fi

@@ -18,16 +18,14 @@
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+LIDARR_URL="${LIDARR_URL:-http://localhost:8686}"
+
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
 LIDARR_KEY="${LIDARR_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  echo "Usage: export CLAWARR_HOST=192.168.1.100"
-  exit 1
-fi
 
 if ! command -v jq &> /dev/null; then
   echo "❌ Error: jq is required but not installed"
@@ -44,23 +42,23 @@ api_call() {
   local app=$1
   local endpoint=$2
   local key=""
-  local port=""
+  local url=""
   local api_ver=""
   
   case "$app" in
     radarr)
       key="$RADARR_KEY"
-      port=7878
+      url="$RADARR_URL"
       api_ver="v3"
       ;;
     sonarr)
       key="$SONARR_KEY"
-      port=8989
+      url="$SONARR_URL"
       api_ver="v3"
       ;;
     lidarr)
       key="$LIDARR_KEY"
-      port=8686
+      url="$LIDARR_URL"
       api_ver="v1"
       ;;
     *)
@@ -74,7 +72,7 @@ api_call() {
     return 1
   fi
   
-  curl -sf -H "X-Api-Key: $key" "http://${HOST}:${port}/api/${api_ver}${endpoint}"
+  curl -sf -H "X-Api-Key: $key" "${url}/api/${api_ver}${endpoint}"
 }
 
 # Command: stats

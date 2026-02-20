@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
 # notifiarr.sh - Notifiarr notification management
 # Usage: notifiarr.sh <command> [args...]
-# Requires: CLAWARR_HOST (port 5454), NOTIFIARR_KEY
+# Requires: NOTIFIARR_URL (default: http://localhost:5454), NOTIFIARR_KEY
+
+# Service URLs (can be overridden via environment variables)
+NOTIFIARR_URL="${NOTIFIARR_URL:-http://localhost:5454}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 API_KEY="${NOTIFIARR_KEY:-}"
 BASE_URL=""
 PORT="${NOTIFIARR_PORT:-5454}"
 
-init() {
-  if [[ -z "$HOST" ]]; then
-    echo "Error: CLAWARR_HOST not set" >&2; exit 1
-  fi
-  BASE_URL="http://${HOST}:${PORT}"
+init() {BASE_URL="http://${RADARR_URL}:${PORT}"
 }
 
 api() {
@@ -139,7 +142,7 @@ cmd_config() {
   echo "  4. Enable notification triggers"
   echo ""
   echo "  Environment variables for this script:"
-  echo "    CLAWARR_HOST=${HOST}"
+  echo "    NOTIFIARR_URL=${NOTIFIARR_URL}"
   echo "    NOTIFIARR_KEY=${API_KEY:-<not set>}"
   echo "    NOTIFIARR_PORT=${PORT}"
 }
@@ -157,7 +160,7 @@ Commands:
   logs                  Recent notification log
 
 Environment:
-  CLAWARR_HOST          Host IP/hostname
+  NOTIFIARR_URL          Notifiarr URL (default: http://localhost:5454)
   NOTIFIARR_KEY         Notifiarr API key
   NOTIFIARR_PORT        Port (default: 5454)
 

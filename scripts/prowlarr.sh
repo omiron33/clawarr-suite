@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
 # prowlarr.sh - Prowlarr indexer management
 # Usage: prowlarr.sh <command> [args...]
-# Requires: CLAWARR_HOST, PROWLARR_KEY
+# Requires: PROWLARR_URL, PROWLARR_KEY
+
+# Service URLs (can be overridden via environment variables)
+PROWLARR_URL="${PROWLARR_URL:-http://localhost:9696}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 API_KEY="${PROWLARR_KEY:-}"
 BASE_URL=""
 
-init() {
-  if [[ -z "$HOST" ]]; then
-    echo "Error: CLAWARR_HOST not set" >&2; exit 1
-  fi
-  if [[ -z "$API_KEY" ]]; then
+init() {if [[ -z "$API_KEY" ]]; then
     echo "Error: PROWLARR_KEY not set" >&2; exit 1
   fi
-  BASE_URL="http://${HOST}:9696"
+  BASE_URL="${PROWLARR_URL}"
 }
 
 api() {
@@ -148,7 +151,7 @@ cmd_add_app() {
     readarr) impl="Readarr" ;;
     *) echo "Unknown app type: ${app_type}" >&2; exit 1 ;;
   esac
-  local prowlarr_url="http://${HOST}:9696"
+  local prowlarr_url="${PROWLARR_URL}"
   local payload
   payload=$(cat <<EOF
 {
@@ -228,7 +231,7 @@ Commands:
   logs [count]          Recent logs
 
 Environment:
-  CLAWARR_HOST          Host IP/hostname
+  PROWLARR_URL          Prowlarr URL (default: http://localhost:9696)
   PROWLARR_KEY          Prowlarr API key
 EOF
 }

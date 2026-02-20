@@ -12,18 +12,17 @@
 #   rename <app> <id>                      - Trigger rename scan
 #   refresh <app> [id]                     - Refresh metadata (all or specific ID)
 
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 SONARR_KEY="${SONARR_KEY:-}"
-RADARR_KEY="${RADARR_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  exit 1
-fi
-
-if ! command -v jq &> /dev/null; then
+RADARR_KEY="${RADARR_KEY:-}"if ! command -v jq &> /dev/null; then
   echo "❌ Error: jq is required"
   exit 1
 fi
@@ -66,7 +65,7 @@ api_call() {
     return 1
   fi
   
-  local url="http://${HOST}:${port}/api/${api_ver}${endpoint}"
+  local url="http://${RADARR_URL}:${port}/api/${api_ver}${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-Api-Key: $key" "$url"

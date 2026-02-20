@@ -311,16 +311,16 @@ cmd_sync() {
   echo ""
   
   # Check for Tautulli
-  if [[ -z "${TAUTULLI_KEY:-}" ]] || [[ -z "${CLAWARR_HOST:-}" ]]; then
+  if [[ -z "${TAUTULLI_KEY:-}" ]] || [[ -z "${TAUTULLI_URL:-}" ]]; then
     echo "❌ Tautulli not configured"
-    echo "Set: TAUTULLI_KEY and CLAWARR_HOST"
+    echo "Set: TAUTULLI_KEY and TAUTULLI_URL"
     exit 1
   fi
   
   echo "Fetching Plex watch history..."
   
   local tautulli_history
-  tautulli_history=$(curl -sf "http://${CLAWARR_HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=100")
+  tautulli_history=$(curl -sf "${TAUTULLI_URL:-http://localhost:8181}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=100")
   
   if [[ -z "$tautulli_history" ]]; then
     echo "❌ Failed to fetch Tautulli history"

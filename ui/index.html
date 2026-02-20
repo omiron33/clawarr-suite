@@ -669,8 +669,7 @@
       card.style.display = '';
       let lines = ['# ClawARR Suite — Environment Config', `# Generated ${new Date().toISOString()}`, ''];
       const hosts = s.hosts || [];
-      if (hosts.length === 1) lines.push(`export CLAWARR_HOST=${hosts[0]}`);
-      else if (hosts.length > 1) lines.push(`# Multiple hosts detected: ${hosts.join(', ')}`, `export CLAWARR_HOST=${hosts[0]}`);
+      // URLs will be exported per-service below
       lines.push('');
       for (const app of APPS) {
         const keyInfo = (s.keys || {})[app.id];

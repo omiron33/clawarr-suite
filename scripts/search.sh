@@ -3,12 +3,19 @@
 # Usage: search.sh "<query>" <type>
 #   type: movie, series, music
 
+# Service URLs (can be overridden via environment variables)
+LIDARR_URL="${LIDARR_URL:-http://localhost:8686}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 set -euo pipefail
 
 QUERY="${1:-}"
 TYPE="${2:-movie}"
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 RADARR_KEY="${RADARR_KEY:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 LIDARR_KEY="${LIDARR_KEY:-}"
@@ -23,16 +30,9 @@ if [[ -z "$QUERY" ]]; then
   echo "  $0 \"foundation\" series"
   echo "  $0 \"pink floyd\" music"
   echo ""
-  echo "Requires: CLAWARR_HOST, RADARR_KEY/SONARR_KEY/LIDARR_KEY environment variables"
+  echo "Requires: RADARR_URL/SONARR_URL/LIDARR_URL and RADARR_KEY/SONARR_KEY/LIDARR_KEY environment variables"
   exit 1
-fi
-
-if [[ -z "$HOST" ]]; then
-  echo "Error: CLAWARR_HOST not set"
-  exit 1
-fi
-
-if ! command -v jq &> /dev/null; then
+fiif ! command -v jq &> /dev/null; then
   echo "❌ Error: jq is required but not installed"
   exit 1
 fi
@@ -51,7 +51,7 @@ case "$TYPE" in
     echo ""
     
     results=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" \
-      "http://${HOST}:7878/api/v3/movie/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
+      "${RADARR_URL}/api/v3/movie/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
     
@@ -74,7 +74,7 @@ case "$TYPE" in
     echo ""
     
     results=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" \
-      "http://${HOST}:8989/api/v3/series/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
+      "${SONARR_URL}/api/v3/series/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
     
@@ -97,7 +97,7 @@ case "$TYPE" in
     echo ""
     
     results=$(curl -sf -H "X-Api-Key: ${LIDARR_KEY}" \
-      "http://${HOST}:8686/api/v1/search?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
+      "${LIDARR_URL}/api/v1/search?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
     
