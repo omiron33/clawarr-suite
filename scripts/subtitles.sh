@@ -8,17 +8,17 @@
 #   search <type> <id>  - Manual subtitle search (type: series|movie)
 #   languages           - Configured languages
 
+# Service URLs (can be overridden via environment variables)
+BAZARR_URL="${BAZARR_URL:-http://localhost:6767}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
-BAZARR_KEY="${BAZARR_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  exit 1
-fi
-
-if [[ -z "$BAZARR_KEY" ]]; then
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+BAZARR_KEY="${BAZARR_KEY:-}"if [[ -z "$BAZARR_KEY" ]]; then
   echo "❌ Error: BAZARR_KEY not set"
   exit 1
 fi
@@ -39,7 +39,7 @@ bazarr_api() {
   local method="${2:-GET}"
   local data="${3:-}"
   
-  local url="http://${HOST}:6767/api${endpoint}"
+  local url="${BAZARR_URL}/api${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-API-Key: $BAZARR_KEY" "$url"

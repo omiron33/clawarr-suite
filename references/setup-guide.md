@@ -410,8 +410,7 @@ After installation on any platform:
 
 Use ClawARR discovery:
 ```bash
-export CLAWARR_HOST=192.168.1.100
-scripts/discover.sh $CLAWARR_HOST
+scripts/discover.sh
 ```
 
 Get API keys via `/initialize.js`:
@@ -541,7 +540,8 @@ Get Plex token for API:
 
 ```bash
 # Set environment
-export CLAWARR_HOST=192.168.1.100
+export RADARR_URL=http://192.168.1.100:7878
+export SONARR_URL=http://192.168.1.100:8989
 export RADARR_KEY=xxxx
 export SONARR_KEY=yyyy
 export OVERSEERR_KEY=zzzz
@@ -561,7 +561,9 @@ scripts/queue.sh
 Create `.env` file:
 ```bash
 # ~/.clawarr.env
-CLAWARR_HOST=192.168.1.100
+# Service URLs (configure as needed)
+RADARR_URL=http://192.168.1.100:7878
+SONARR_URL=http://192.168.1.100:8989
 SONARR_KEY=abc123...
 RADARR_KEY=def456...
 LIDARR_KEY=ghi789...

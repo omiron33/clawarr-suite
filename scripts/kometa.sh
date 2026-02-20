@@ -3,12 +3,19 @@
 # Usage: kometa.sh <command> [args...]
 # Requires: Docker access to kometa container or SSH
 
+# Service URLs (can be overridden via environment variables)
+PLEX_URL="${PLEX_URL:-http://localhost:32400}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 set -euo pipefail
 
 DOCKER_HOST_SSH="${KOMETA_SSH:-}"
 DOCKER_CMD="${KOMETA_DOCKER_CMD:-docker}"
 CONTAINER="${KOMETA_CONTAINER:-kometa}"
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 PLEX_TOKEN="${PLEX_TOKEN:-}"
 
 docker_exec() {
@@ -81,20 +88,20 @@ cmd_collections() {
   echo "📚 Kometa Collections"
   echo ""
   if [[ -z "$HOST" || -z "$PLEX_TOKEN" ]]; then
-    echo "  Need CLAWARR_HOST and PLEX_TOKEN to query Plex collections"
+    echo "  Need PLEX_URL and PLEX_TOKEN to query Plex collections"
     return
   fi
 
   # Query Plex for collections
   local sections
   sections=$(curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" \
-    "http://${HOST}:32400/library/sections" 2>/dev/null)
+    "${PLEX_URL}/library/sections" 2>/dev/null)
 
   echo "$sections" | jq -r '.MediaContainer.Directory[] | "\(.key) \(.title)"' 2>/dev/null | while read -r key title; do
     echo "  📁 ${title}:"
     local cols
     cols=$(curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" \
-      "http://${HOST}:32400/library/sections/${key}/collections" 2>/dev/null)
+      "${PLEX_URL}/library/sections/${key}/collections" 2>/dev/null)
     local count
     count=$(echo "$cols" | jq '.MediaContainer.size // 0' 2>/dev/null)
     if [[ "$count" != "0" && "$count" != "null" ]]; then
@@ -185,7 +192,7 @@ Environment:
   KOMETA_SSH            SSH host for remote Docker
   KOMETA_DOCKER_CMD     Docker command (default: docker)
   KOMETA_CONTAINER      Container name (default: kometa)
-  CLAWARR_HOST          Host IP (for Plex queries)
+  PLEX_URL          Plex URL (default: http://localhost:32400)
   PLEX_TOKEN            Plex auth token
 EOF
 }

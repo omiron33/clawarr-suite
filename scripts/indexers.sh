@@ -7,17 +7,17 @@
 #   test [id]         - Test indexer connectivity (all or specific ID)
 #   stats             - Indexer performance statistics
 
+# Service URLs (can be overridden via environment variables)
+PROWLARR_URL="${PROWLARR_URL:-http://localhost:9696}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
-PROWLARR_KEY="${PROWLARR_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  exit 1
-fi
-
-if [[ -z "$PROWLARR_KEY" ]]; then
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+PROWLARR_KEY="${PROWLARR_KEY:-}"if [[ -z "$PROWLARR_KEY" ]]; then
   echo "❌ Error: PROWLARR_KEY not set"
   exit 1
 fi
@@ -38,7 +38,7 @@ prowlarr_api() {
   local endpoint=$2
   local data="${3:-}"
   
-  local url="http://${HOST}:9696/api/v1${endpoint}"
+  local url="${PROWLARR_URL}/api/v1${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-Api-Key: $PROWLARR_KEY" "$url"

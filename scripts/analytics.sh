@@ -13,18 +13,19 @@
 #   recent-added [count]        - Recently added to Plex (default: 10)
 #   play-totals                 - Total play count and duration
 
+# Service URLs (can be overridden via environment variables)
+PLEX_URL="${PLEX_URL:-http://localhost:32400}"
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+TAUTULLI_URL="${TAUTULLI_URL:-http://localhost:8181}"
+
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 TAUTULLI_KEY="${TAUTULLI_KEY:-}"
-PLEX_TOKEN="${PLEX_TOKEN:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  exit 1
-fi
-
-if ! command -v jq &> /dev/null; then
+PLEX_TOKEN="${PLEX_TOKEN:-}"if ! command -v jq &> /dev/null; then
   echo "❌ Error: jq is required"
   exit 1
 fi
@@ -45,7 +46,7 @@ tautulli_api() {
     return 1
   fi
   
-  local url="http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=${cmd}"
+  local url="${TAUTULLI_URL}/api/v2?apikey=${TAUTULLI_KEY}&cmd=${cmd}"
   if [[ -n "$params" ]]; then
     url="${url}&${params}"
   fi
@@ -63,7 +64,7 @@ plex_api() {
   fi
   
   curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" -H "Accept: application/json" \
-    "http://${HOST}:32400${endpoint}"
+    "${PLEX_URL}${endpoint}"
 }
 
 # Command: activity (current streams)

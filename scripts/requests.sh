@@ -11,13 +11,9 @@
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+OVERSEERR_URL="${OVERSEERR_URL:-http://localhost:5055}"
 OVERSEERR_KEY="${OVERSEERR_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "❌ Error: CLAWARR_HOST not set"
-  exit 1
-fi
 
 if [[ -z "$OVERSEERR_KEY" ]]; then
   echo "❌ Error: OVERSEERR_KEY not set"
@@ -40,7 +36,7 @@ overseerr_api() {
   local endpoint=$2
   local data="${3:-}"
   
-  local url="http://${HOST}:5055/api/v1${endpoint}"
+  local url="${OVERSEERR_URL}/api/v1${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-Api-Key: $OVERSEERR_KEY" "$url"

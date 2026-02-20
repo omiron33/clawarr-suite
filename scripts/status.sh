@@ -1,32 +1,39 @@
 #!/usr/bin/env bash
 # status.sh - Check health status of all *arr services
 # Usage: status.sh [host] [sonarr_key] [radarr_key] ...
-#        Or set environment variables: CLAWARR_HOST, SONARR_KEY, etc.
+#        Or set environment variables: RADARR_URL, SONARR_URL, etc.
 
 set -euo pipefail
 
-# Accept args or use environment variables
-HOST="${1:-${CLAWARR_HOST:-}}"
-SONARR_KEY="${2:-${SONARR_KEY:-}}"
-RADARR_KEY="${3:-${RADARR_KEY:-}}"
-LIDARR_KEY="${4:-${LIDARR_KEY:-}}"
-READARR_KEY="${5:-${READARR_KEY:-}}"
-PROWLARR_KEY="${6:-${PROWLARR_KEY:-}}"
-BAZARR_KEY="${7:-${BAZARR_KEY:-}}"
-OVERSEERR_KEY="${8:-${OVERSEERR_KEY:-}}"
-PLEX_TOKEN="${9:-${PLEX_TOKEN:-}}"
-TAUTULLI_KEY="${10:-${TAUTULLI_KEY:-}}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+LIDARR_URL="${LIDARR_URL:-http://localhost:8686}"
+READARR_URL="${READARR_URL:-http://localhost:8787}"
+PROWLARR_URL="${PROWLARR_URL:-http://localhost:9696}"
+BAZARR_URL="${BAZARR_URL:-http://localhost:6767}"
+OVERSEERR_URL="${OVERSEERR_URL:-http://localhost:5055}"
+PLEX_URL="${PLEX_URL:-http://localhost:32400}"
+TAUTULLI_URL="${TAUTULLI_URL:-http://localhost:8181}"
+SABNZBD_URL="${SABNZBD_URL:-http://localhost:38080}"
+NOTIFIARR_URL="${NOTIFIARR_URL:-http://localhost:5454}"
+KOMETA_URL="${KOMETA_URL:-http://localhost:7575}"
+FLARESOLVERR_URL="${FLARESOLVERR_URL:-http://localhost:8191}"
+MAINTAINERR_URL="${MAINTAINERR_URL:-http://localhost:6246}"
+HOMARR_URL="${HOMARR_URL:-http://localhost:7575}"
 
-if [[ -z "$HOST" ]]; then
-  echo "Usage: $0 <host> [sonarr_key] [radarr_key] ..."
-  echo ""
-  echo "Or set environment variables:"
-  echo "  export CLAWARR_HOST=192.168.1.100"
-  echo "  export SONARR_KEY=abc123..."
-  echo "  export RADARR_KEY=def456..."
-  echo "  $0"
-  exit 1
-fi
+# Accept args or use environment variables for API keys
+SONARR_KEY="${1:-${SONARR_KEY:-}}"
+RADARR_KEY="${2:-${RADARR_KEY:-}}"
+LIDARR_KEY="${3:-${LIDARR_KEY:-}}"
+READARR_KEY="${4:-${READARR_KEY:-}}"
+PROWLARR_KEY="${5:-${PROWLARR_KEY:-}}"
+BAZARR_KEY="${6:-${BAZARR_KEY:-}}"
+OVERSEERR_KEY="${7:-${OVERSEERR_KEY:-}}"
+PLEX_TOKEN="${8:-${PLEX_TOKEN:-}}"
+TAUTULLI_KEY="${9:-${TAUTULLI_KEY:-}}"
+SABNZBD_KEY="${10:-${SABNZBD_KEY:-}}"
+NOTIFIARR_KEY="${11:-${NOTIFIARR_KEY:-}}"
 
 # Check if jq is available
 if ! command -v jq &> /dev/null; then
@@ -35,12 +42,12 @@ if ! command -v jq &> /dev/null; then
   exit 1
 fi
 
-echo "📊 Checking health status for $HOST..."
+echo "📊 Checking health status of services..."
 echo ""
 
 check_service() {
   local name=$1
-  local port=$2
+  local url=$2
   local api_key=$3
   local api_path=$4
   local key_header=${5:-X-Api-Key}
@@ -50,10 +57,10 @@ check_service() {
     return
   fi
   
-  local url="http://${HOST}:${port}${api_path}"
+  local full_url="${url}${api_path}"
   local response
   
-  if ! response=$(curl -sf -H "${key_header}: ${api_key}" "$url" 2>&1); then
+  if ! response=$(curl -sf -H "${key_header}: ${api_key}" "$full_url" 2>&1); then
     echo "❌ $name - Connection failed"
     return
   fi
@@ -75,16 +82,16 @@ check_service() {
 }
 
 # Check each service
-[[ -n "$SONARR_KEY" ]] && check_service "Sonarr" 8989 "$SONARR_KEY" "/api/v3/health"
-[[ -n "$RADARR_KEY" ]] && check_service "Radarr" 7878 "$RADARR_KEY" "/api/v3/health"
-[[ -n "$LIDARR_KEY" ]] && check_service "Lidarr" 8686 "$LIDARR_KEY" "/api/v1/health"
-[[ -n "$READARR_KEY" ]] && check_service "Readarr" 8787 "$READARR_KEY" "/api/v1/health"
-[[ -n "$PROWLARR_KEY" ]] && check_service "Prowlarr" 9696 "$PROWLARR_KEY" "/api/v1/health"
-[[ -n "$BAZARR_KEY" ]] && check_service "Bazarr" 6767 "$BAZARR_KEY" "/api/system/health"
+[[ -n "$SONARR_KEY" ]] && check_service "Sonarr" "$SONARR_URL" "$SONARR_KEY" "/api/v3/health"
+[[ -n "$RADARR_KEY" ]] && check_service "Radarr" "$RADARR_URL" "$RADARR_KEY" "/api/v3/health"
+[[ -n "$LIDARR_KEY" ]] && check_service "Lidarr" "$LIDARR_URL" "$LIDARR_KEY" "/api/v1/health"
+[[ -n "$READARR_KEY" ]] && check_service "Readarr" "$READARR_URL" "$READARR_KEY" "/api/v1/health"
+[[ -n "$PROWLARR_KEY" ]] && check_service "Prowlarr" "$PROWLARR_URL" "$PROWLARR_KEY" "/api/v1/health"
+[[ -n "$BAZARR_KEY" ]] && check_service "Bazarr" "$BAZARR_URL" "$BAZARR_KEY" "/api/system/health"
 
 # Overseerr uses different header
 if [[ -n "$OVERSEERR_KEY" ]]; then
-  if response=$(curl -sf -H "X-Api-Key: ${OVERSEERR_KEY}" "http://${HOST}:5055/api/v1/status" 2>&1); then
+  if response=$(curl -sf -H "X-Api-Key: ${OVERSEERR_KEY}" "${OVERSEERR_URL}/api/v1/status" 2>&1); then
     echo "✅ Overseerr - Running"
   else
     echo "❌ Overseerr - Connection failed"
@@ -93,7 +100,7 @@ fi
 
 # Plex uses token
 if [[ -n "$PLEX_TOKEN" ]]; then
-  if curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" "http://${HOST}:32400/identity" &>/dev/null; then
+  if curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" "${PLEX_URL}/identity" &>/dev/null; then
     echo "✅ Plex - Running"
   else
     echo "❌ Plex - Connection failed"
@@ -102,7 +109,7 @@ fi
 
 # Tautulli
 if [[ -n "$TAUTULLI_KEY" ]]; then
-  if response=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=status" 2>&1); then
+  if response=$(curl -sf "${TAUTULLI_URL}/api/v2?apikey=${TAUTULLI_KEY}&cmd=status" 2>&1); then
     echo "✅ Tautulli - Running"
   else
     echo "❌ Tautulli - Connection failed"
@@ -110,9 +117,8 @@ if [[ -n "$TAUTULLI_KEY" ]]; then
 fi
 
 # SABnzbd
-SABNZBD_KEY="${SABNZBD_KEY:-}"
 if [[ -n "$SABNZBD_KEY" ]]; then
-  if curl -sf "http://${HOST}:${SABNZBD_PORT:-38080}/api?mode=version&apikey=${SABNZBD_KEY}" &>/dev/null; then
+  if curl -sf "${SABNZBD_URL}/api?mode=version&apikey=${SABNZBD_KEY}" &>/dev/null; then
     echo "✅ SABnzbd - Running"
   else
     echo "❌ SABnzbd - Connection failed"
@@ -124,23 +130,22 @@ echo ""
 echo "🔧 Companion Services:"
 
 # FlareSolverr
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:8191" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "${FLARESOLVERR_URL}" 2>/dev/null; then
   echo "✅ FlareSolverr - Running"
 fi
 
 # Maintainerr
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:6246" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "${MAINTAINERR_URL}" 2>/dev/null; then
   echo "✅ Maintainerr - Running"
 fi
 
 # Notifiarr
-NOTIFIARR_KEY="${NOTIFIARR_KEY:-}"
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:5454" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "${NOTIFIARR_URL}" 2>/dev/null; then
   echo "✅ Notifiarr - Running"
 fi
 
 # Homarr
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:7575" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "${HOMARR_URL}" 2>/dev/null; then
   echo "✅ Homarr - Running"
 fi
 

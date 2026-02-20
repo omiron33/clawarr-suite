@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 # maintainerr.sh - Maintainerr library cleanup management
 # Usage: maintainerr.sh <command> [args...]
-# Requires: CLAWARR_HOST (port 6246)
+# Requires: MAINTAINERR_URL (default: http://localhost:6246)
+
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 BASE_URL=""
 PORT="${MAINTAINERR_PORT:-6246}"
 
-init() {
-  if [[ -z "$HOST" ]]; then
-    echo "Error: CLAWARR_HOST not set" >&2; exit 1
-  fi
-  BASE_URL="http://${HOST}:${PORT}"
+init() {BASE_URL="http://${RADARR_URL}:${PORT}"
 }
 
 api() {
@@ -144,7 +146,7 @@ Commands:
   logs                  View activity log
 
 Environment:
-  CLAWARR_HOST          Host IP/hostname
+  MAINTAINERR_URL      Maintainerr URL (default: http://localhost:6246)
   MAINTAINERR_PORT      Port (default: 6246)
 
 Common Rules to Create (via web UI):

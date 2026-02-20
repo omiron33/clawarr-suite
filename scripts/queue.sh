@@ -4,20 +4,12 @@
 
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
-
-if [[ -z "$HOST" ]]; then
-  echo "Error: CLAWARR_HOST not set"
-  echo ""
-  echo "Usage:"
-  echo "  export CLAWARR_HOST=192.168.1.100"
-  echo "  export SONARR_KEY=abc123..."
-  echo "  export RADARR_KEY=def456..."
-  echo "  $0"
-  exit 1
-fi
 
 if ! command -v jq &> /dev/null; then
   echo "❌ Error: jq is required but not installed"
@@ -30,7 +22,7 @@ echo ""
 if [[ -n "$RADARR_KEY" ]]; then
   echo "=== Radarr Queue ==="
   
-  queue=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:7878/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "${RADARR_URL}/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   count=$(echo "$queue" | jq '.records | length')
   
@@ -45,7 +37,7 @@ fi
 if [[ -n "$SONARR_KEY" ]]; then
   echo "=== Sonarr Queue ==="
   
-  queue=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:8989/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "${SONARR_URL}/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   count=$(echo "$queue" | jq '.records | length')
   

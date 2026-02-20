@@ -9,9 +9,16 @@
 #   profile <username>           - Scrape public profile stats
 #   diary <username> [year]      - View public diary
 
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
+TAUTULLI_URL="${TAUTULLI_URL:-http://localhost:8181}"
+
 set -euo pipefail
 
-HOST="${CLAWARR_HOST:-}"
+# Service URLs (can be overridden via environment variables)
+RADARR_URL="${RADARR_URL:-http://localhost:7878}"
+SONARR_URL="${SONARR_URL:-http://localhost:8989}"
 TAUTULLI_KEY="${TAUTULLI_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
 
@@ -45,7 +52,7 @@ cmd_export() {
     echo "Fetching watch history from Tautulli..."
     
     local history
-    history=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=10000&media_type=movie")
+    history=$(curl -sf "${TAUTULLI_URL}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=10000&media_type=movie")
     
     if [[ -z "$history" ]]; then
       echo "❌ Failed to fetch Tautulli history"
@@ -86,7 +93,7 @@ cmd_export() {
     echo "Fetching movie library from Radarr..."
     
     local movies
-    movies=$(curl -sf -H "X-Api-Key: $RADARR_KEY" "http://${HOST}:7878/api/v3/movie")
+    movies=$(curl -sf -H "X-Api-Key: $RADARR_KEY" "${RADARR_URL}/api/v3/movie")
     
     if [[ -z "$movies" ]]; then
       echo "❌ Failed to fetch Radarr library"
@@ -124,8 +131,8 @@ cmd_export() {
     echo "❌ Neither Tautulli nor Radarr configured"
     echo ""
     echo "Set one of:"
-    echo "  • TAUTULLI_KEY + CLAWARR_HOST (for watch history)"
-    echo "  • RADARR_KEY + CLAWARR_HOST (for library)"
+    echo "  • TAUTULLI_KEY + TAUTULLI_URL (for watch history)"
+    echo "  • RADARR_KEY + RADARR_URL (for library)"
     exit 1
   fi
 }
