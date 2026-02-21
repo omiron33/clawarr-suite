@@ -1,12 +1,67 @@
 {
   "id": "clawarr-suite",
   "name": "ClawARR Suite",
-  "description": "Unified control surface for self-hosted media stacks (Arr suite + Overseerr + Plex/Tautulli)",
+  "description": "Unified control surface for self-hosted media stacks (Sonarr, Radarr, Prowlarr, Plex, Tautulli, SABnzbd, and 10+ companion services). Read-only analytics, library management, request handling, and download monitoring. Destructive actions (delete/remove) require explicit user invocation.",
   "configSchema": {
     "type": "object",
     "additionalProperties": true,
     "properties": {
       "enabled": { "type": "boolean", "default": true }
     }
-  }
+  },
+  "requires": {
+    "bins": ["bash", "curl", "jq"],
+    "optionalBins": [
+      { "bin": "bc",     "reason": "percentage and GB math in analytics/library scripts" },
+      { "bin": "sed",    "reason": "text processing in setup and config scripts" },
+      { "bin": "docker", "reason": "companion service management (Kometa, Recyclarr, Unpackerr); only used if RECYCLARR_SSH / KOMETA_SSH / UNPACKERR_SSH env vars are set" },
+      { "bin": "ssh",    "reason": "remote container access on NAS/Docker hosts; only invoked when *_SSH env vars are set" }
+    ],
+    "env": [
+      { "key": "CLAWARR_HOST",       "required": false, "description": "Primary host IP/hostname for *arr services (default: 192.168.1.100)" },
+      { "key": "SONARR_KEY",         "required": false, "description": "Sonarr API key — needed for TV library operations" },
+      { "key": "RADARR_KEY",         "required": false, "description": "Radarr API key — needed for movie library operations" },
+      { "key": "LIDARR_KEY",         "required": false, "description": "Lidarr API key — needed for music library operations" },
+      { "key": "READARR_KEY",        "required": false, "description": "Readarr API key — needed for book library operations" },
+      { "key": "PROWLARR_KEY",       "required": false, "description": "Prowlarr API key — needed for indexer management" },
+      { "key": "BAZARR_KEY",         "required": false, "description": "Bazarr API key — needed for subtitle management" },
+      { "key": "OVERSEERR_KEY",      "required": false, "description": "Overseerr API key — needed for request management" },
+      { "key": "PLEX_TOKEN",         "required": false, "description": "Plex authentication token — needed for Plex library and streaming analytics" },
+      { "key": "TAUTULLI_KEY",       "required": false, "description": "Tautulli API key — needed for viewing analytics" },
+      { "key": "SABNZBD_KEY",        "required": false, "description": "SABnzbd API key — needed for download client management" },
+      { "key": "NOTIFIARR_KEY",      "required": false, "description": "Notifiarr API key — needed for notification management" },
+      { "key": "TRAKT_CLIENT_ID",    "required": false, "description": "Trakt.tv OAuth client ID — needed for Trakt integration" },
+      { "key": "TRAKT_CLIENT_SECRET","required": false, "description": "Trakt.tv OAuth client secret — needed for Trakt integration" },
+      { "key": "SIMKL_CLIENT_ID",    "required": false, "description": "Simkl OAuth client ID — needed for Simkl integration" },
+      { "key": "SIMKL_CLIENT_SECRET","required": false, "description": "Simkl OAuth client secret — needed for Simkl integration" },
+      { "key": "LETTERBOXD_API_KEY", "required": false, "description": "Letterboxd API key — optional; CSV export path works without it" },
+      { "key": "RECYCLARR_SSH",      "required": false, "description": "SSH host alias for Recyclarr container access; triggers ssh/docker usage" },
+      { "key": "KOMETA_SSH",         "required": false, "description": "SSH host alias for Kometa container access; triggers ssh/docker usage" },
+      { "key": "UNPACKERR_SSH",      "required": false, "description": "SSH host alias for Unpackerr container access; triggers ssh/docker usage" },
+      { "key": "DOCKER_CONFIG_BASE", "required": false, "description": "Docker config root path (default: /volume1/docker for Synology; /opt/docker otherwise)" }
+    ]
+  },
+  "security": {
+    "networkScope": "local-lan-and-user-configured-hosts",
+    "externalHosts": [
+      "api.trakt.tv — Trakt.tv OAuth and watch history sync (only when Trakt env vars are set)",
+      "api.simkl.com — Simkl OAuth and history sync (only when Simkl env vars are set)",
+      "letterboxd.com — Letterboxd public profile reads; no write API",
+      "raw.githubusercontent.com / TRaSH-Guides — Recyclarr profile downloads (only when recyclarr.sh sync is run)"
+    ],
+    "secretsPolicy": "API keys sourced from environment variables only; never hardcoded; tokens saved locally to ~/.config/clawarr/ with 600 permissions",
+    "destructiveActions": "None by default. Delete/remove operations (manage.sh remove, maintainerr.sh run, Radarr/Sonarr delete APIs) require explicit user invocation and are never triggered automatically.",
+    "dockerSshScope": "docker and ssh are only invoked for companion service observability (status, logs, restart) when the corresponding *_SSH env variables are set by the user. Scripts do not scan for containers or discover hosts autonomously.",
+    "noTelemetry": true
+  },
+  "capabilities": [
+    "arr-api-management",
+    "docker-service-observability",
+    "dashboard-generation",
+    "media-tracker-sync",
+    "download-client-management",
+    "subtitle-management",
+    "indexer-management",
+    "library-analytics"
+  ]
 }
