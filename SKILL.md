@@ -12,19 +12,42 @@ metadata:
   {
     "openclaw":
       {
-        "requires": { "bins": ["bash", "curl", "jq", "bc", "sed"] },
+        "requires":
+          {
+            "bins": ["bash", "curl", "jq"],
+            "optionalBins": ["bc", "sed", "docker", "ssh"],
+            "env":
+              [
+                "CLAWARR_HOST",
+                "SONARR_KEY", "RADARR_KEY", "LIDARR_KEY", "READARR_KEY",
+                "PROWLARR_KEY", "BAZARR_KEY", "OVERSEERR_KEY",
+                "PLEX_TOKEN", "TAUTULLI_KEY", "SABNZBD_KEY", "NOTIFIARR_KEY",
+                "TRAKT_CLIENT_ID", "TRAKT_CLIENT_SECRET",
+                "SIMKL_CLIENT_ID", "SIMKL_CLIENT_SECRET",
+                "LETTERBOXD_API_KEY",
+                "RECYCLARR_SSH", "KOMETA_SSH", "UNPACKERR_SSH",
+                "DOCKER_CONFIG_BASE"
+              ]
+          },
         "security":
           {
             "networkScope": "local-lan-and-user-configured-hosts",
-            "secretsPolicy": "api keys loaded from env/user config only; never hardcoded",
-            "destructiveActions": "none by default; explicit command required for delete/remove actions"
+            "externalHosts": ["api.trakt.tv", "api.simkl.com", "letterboxd.com", "raw.githubusercontent.com"],
+            "secretsPolicy": "API keys sourced from environment variables only; never hardcoded; tokens saved to ~/.config/clawarr/ with 600 permissions",
+            "destructiveActions": "none by default; delete/remove operations require explicit user invocation; never triggered automatically",
+            "dockerSshScope": "docker and ssh invoked only for companion service observability when *_SSH env vars are set by the user",
+            "noTelemetry": true
           },
         "capabilities":
           [
             "arr-api-management",
             "docker-service-observability",
             "dashboard-generation",
-            "media-tracker-sync"
+            "media-tracker-sync",
+            "download-client-management",
+            "subtitle-management",
+            "indexer-management",
+            "library-analytics"
           ]
       }
   }
@@ -33,6 +56,45 @@ metadata:
 # ClawARR Suite
 
 Unified deep-integration control for self-hosted media automation stacks. This skill provides comprehensive agent-executable operations across the entire *arr ecosystem with rich analytics, dashboard generation, and advanced library exploration.
+
+## Prerequisites & Runtime Scope
+
+### Required binaries
+`bash`, `curl`, `jq` — universally available on macOS/Linux.
+
+### Optional binaries
+| Binary | When used |
+|--------|-----------|
+| `bc`, `sed` | Math and text processing in analytics/library scripts |
+| `docker` | Companion service management (Kometa, Recyclarr, Unpackerr) — **only invoked when `RECYCLARR_SSH`/`KOMETA_SSH`/`UNPACKERR_SSH` env vars are set** |
+| `ssh` | Remote container access on NAS/Docker hosts — **only invoked when `*_SSH` env vars are set** |
+
+If `docker` and `ssh` are not installed or no `*_SSH` env vars are configured, companion-service scripts (`kometa.sh`, `recyclarr.sh`, `unpackerr.sh`) will report unavailable rather than fail silently.
+
+### Environment variables
+All variables are optional — the skill degrades gracefully when a service key is absent. See the **Configuration** section for details on each variable.
+
+**Core services:** `CLAWARR_HOST`, `SONARR_KEY`, `RADARR_KEY`, `LIDARR_KEY`, `READARR_KEY`, `PROWLARR_KEY`, `BAZARR_KEY`, `OVERSEERR_KEY`, `PLEX_TOKEN`, `TAUTULLI_KEY`, `SABNZBD_KEY`, `NOTIFIARR_KEY`
+
+**Media trackers (optional):** `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET`, `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET`, `LETTERBOXD_API_KEY`
+
+**Companion service SSH (optional):** `RECYCLARR_SSH`, `KOMETA_SSH`, `UNPACKERR_SSH`, `DOCKER_CONFIG_BASE`
+
+Tokens are saved locally to `~/.config/clawarr/` with `600` permissions (user read/write only) and never transmitted to third-party endpoints.
+
+### Network access
+- **Primary:** Local LAN / user-configured host IPs (all `*arr` API calls)
+- **External (only when corresponding env vars are set):**
+  - `api.trakt.tv` — Trakt OAuth + watch history sync
+  - `api.simkl.com` — Simkl OAuth + history sync
+  - `letterboxd.com` — Public profile reads only (no write API used)
+  - `raw.githubusercontent.com` — Recyclarr TRaSH-Guides profile downloads (only on `recyclarr.sh sync`)
+
+### Destructive actions
+**None are triggered automatically.** The following require explicit user invocation:
+- `manage.sh remove` — deletes content via Radarr/Sonarr API
+- `maintainerr.sh run` — executes library cleanup rules
+- `unpackerr.sh restart` / `kometa.sh run` / `recyclarr.sh sync` — container operations
 
 ## Security & Scanner Clarity
 
