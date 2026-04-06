@@ -505,7 +505,7 @@ Store in `.env` file and source before running scripts.
 - Overseerr: 5055
 - Plex: 32400
 - Tautulli: 8181
-- SABnzbd: 38080
+- SABnzbd: 8080
 - Notifiarr: 5454
 - Maintainerr: 6246
 - FlareSolverr: 8191
