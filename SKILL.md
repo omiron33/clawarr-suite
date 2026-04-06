@@ -26,7 +26,11 @@ metadata:
                 "SIMKL_CLIENT_ID", "SIMKL_CLIENT_SECRET",
                 "LETTERBOXD_API_KEY",
                 "RECYCLARR_SSH", "KOMETA_SSH", "UNPACKERR_SSH",
-                "DOCKER_CONFIG_BASE"
+                "DOCKER_CONFIG_BASE",
+                "SONARR_PORT", "RADARR_PORT", "LIDARR_PORT", "READARR_PORT",
+                "PROWLARR_PORT", "BAZARR_PORT", "OVERSEERR_PORT",
+                "PLEX_PORT", "TAUTULLI_PORT", "SABNZBD_PORT",
+                "FLARESOLVERR_PORT", "MAINTAINERR_PORT", "NOTIFIARR_PORT", "HOMARR_PORT"
               ]
           },
         "security":
