@@ -46,9 +46,9 @@ echo ""
 REACHABLE=false
 if ping -c 1 -W 2 "$HOST" &>/dev/null; then
   REACHABLE=true
-elif curl -s --connect-timeout 3 -o /dev/null "http://${HOST}:8989/" 2>/dev/null || \
-     curl -s --connect-timeout 3 -o /dev/null "http://${HOST}:7878/" 2>/dev/null || \
-     curl -s --connect-timeout 3 -o /dev/null "http://${HOST}:32400/" 2>/dev/null; then
+elif curl -s --connect-timeout 3 -o /dev/null "http://${HOST}:${SONARR_PORT:-8989}/" 2>/dev/null || \
+     curl -s --connect-timeout 3 -o /dev/null "http://${HOST}:${RADARR_PORT:-7878}/" 2>/dev/null || \
+     curl -s --connect-timeout 3 -o /dev/null "http://${HOST}:${PLEX_PORT:-32400}/" 2>/dev/null; then
   REACHABLE=true
 fi
 
@@ -69,6 +69,18 @@ echo ""
 # Step 3: Service discovery
 echo "Step 2: Scanning for services..."
 echo ""
+
+# User-configurable scan ports (read before tracking vars are initialized below)
+_SONARR_SCAN="${SONARR_PORT:-8989}"
+_RADARR_SCAN="${RADARR_PORT:-7878}"
+_LIDARR_SCAN="${LIDARR_PORT:-8686}"
+_READARR_SCAN="${READARR_PORT:-8787}"
+_PROWLARR_SCAN="${PROWLARR_PORT:-9696}"
+_BAZARR_SCAN="${BAZARR_PORT:-6767}"
+_OVERSEERR_SCAN="${OVERSEERR_PORT:-5055}"
+_PLEX_SCAN="${PLEX_PORT:-32400}"
+_TAUTULLI_SCAN="${TAUTULLI_PORT:-8181}"
+_SABNZBD_SCAN="${SABNZBD_PORT:-8080}"
 
 # Track found services and keys (bash 3.2 compatible — no associative arrays)
 FOUND_APPS=""
@@ -136,16 +148,16 @@ check_service() {
   fi
 }
 
-check_service Sonarr   8989 "/api/v3/system/status" || true
-check_service Radarr   7878 "/api/v3/system/status" || true
-check_service Lidarr   8686 "/api/v1/system/status" || true
-check_service Readarr  8787 "/api/v1/system/status" || true
-check_service Prowlarr 9696 "/api/v1/system/status" || true
-check_service Bazarr   6767 "/api/system/status"    || true
-check_service Overseerr 5055 "/api/v1/status"       || true
-check_service Plex     32400 "/identity"             || true
-check_service Tautulli 8181 "/api/v2?cmd=get_tautulli_info" || true
-check_service SABnzbd  8080 "/api?mode=version"     || true
+check_service Sonarr   "$_SONARR_SCAN"   "/api/v3/system/status" || true
+check_service Radarr   "$_RADARR_SCAN"   "/api/v3/system/status" || true
+check_service Lidarr   "$_LIDARR_SCAN"   "/api/v1/system/status" || true
+check_service Readarr  "$_READARR_SCAN"  "/api/v1/system/status" || true
+check_service Prowlarr "$_PROWLARR_SCAN" "/api/v1/system/status" || true
+check_service Bazarr   "$_BAZARR_SCAN"   "/api/system/status"    || true
+check_service Overseerr "$_OVERSEERR_SCAN" "/api/v1/status"      || true
+check_service Plex     "$_PLEX_SCAN"     "/identity"             || true
+check_service Tautulli "$_TAUTULLI_SCAN" "/api/v2?cmd=get_tautulli_info" || true
+check_service SABnzbd  "$_SABNZBD_SCAN"  "/api?mode=version"     || true
 
 FOUND_COUNT=$(echo "$FOUND_APPS" | wc -w | tr -d ' ')
 echo ""

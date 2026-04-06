@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+PROWLARR_PORT="${PROWLARR_PORT:-9696}"
+
 HOST="${CLAWARR_HOST:-}"
 API_KEY="${PROWLARR_KEY:-}"
 BASE_URL=""
@@ -16,7 +19,7 @@ init() {
   if [[ -z "$API_KEY" ]]; then
     echo "Error: PROWLARR_KEY not set" >&2; exit 1
   fi
-  BASE_URL="http://${HOST}:9696"
+  BASE_URL="http://${HOST}:${PROWLARR_PORT}"
 }
 
 api() {
@@ -148,7 +151,7 @@ cmd_add_app() {
     readarr) impl="Readarr" ;;
     *) echo "Unknown app type: ${app_type}" >&2; exit 1 ;;
   esac
-  local prowlarr_url="http://${HOST}:9696"
+  local prowlarr_url="http://${HOST}:${PROWLARR_PORT}"
   local payload
   payload=$(cat <<EOF
 {

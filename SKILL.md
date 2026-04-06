@@ -26,7 +26,11 @@ metadata:
                 "SIMKL_CLIENT_ID", "SIMKL_CLIENT_SECRET",
                 "LETTERBOXD_API_KEY",
                 "RECYCLARR_SSH", "KOMETA_SSH", "UNPACKERR_SSH",
-                "DOCKER_CONFIG_BASE"
+                "DOCKER_CONFIG_BASE",
+                "SONARR_PORT", "RADARR_PORT", "LIDARR_PORT", "READARR_PORT",
+                "PROWLARR_PORT", "BAZARR_PORT", "OVERSEERR_PORT",
+                "PLEX_PORT", "TAUTULLI_PORT", "SABNZBD_PORT",
+                "FLARESOLVERR_PORT", "MAINTAINERR_PORT", "NOTIFIARR_PORT", "HOMARR_PORT"
               ]
           },
         "security":
@@ -501,7 +505,7 @@ Store in `.env` file and source before running scripts.
 - Overseerr: 5055
 - Plex: 32400
 - Tautulli: 8181
-- SABnzbd: 38080
+- SABnzbd: 8080
 - Notifiarr: 5454
 - Maintainerr: 6246
 - FlareSolverr: 8191

@@ -333,7 +333,7 @@ GET /health  # Returns array of issues
 
 ## SABnzbd (API)
 
-Base URL: `http://host:38080/api`
+Base URL: `http://host:8080/api`
 
 All requests: `?apikey=<key>&mode=<mode>&output=json`
 

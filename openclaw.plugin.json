@@ -38,7 +38,21 @@
       { "key": "RECYCLARR_SSH",      "required": false, "description": "SSH host alias for Recyclarr container access; triggers ssh/docker usage" },
       { "key": "KOMETA_SSH",         "required": false, "description": "SSH host alias for Kometa container access; triggers ssh/docker usage" },
       { "key": "UNPACKERR_SSH",      "required": false, "description": "SSH host alias for Unpackerr container access; triggers ssh/docker usage" },
-      { "key": "DOCKER_CONFIG_BASE", "required": false, "description": "Docker config root path (default: /volume1/docker for Synology; /opt/docker otherwise)" }
+      { "key": "DOCKER_CONFIG_BASE", "required": false, "description": "Docker config root path (default: /volume1/docker for Synology; /opt/docker otherwise)" },
+      { "key": "SONARR_PORT",        "required": false, "description": "Sonarr port (default: 8989)" },
+      { "key": "RADARR_PORT",        "required": false, "description": "Radarr port (default: 7878)" },
+      { "key": "LIDARR_PORT",        "required": false, "description": "Lidarr port (default: 8686)" },
+      { "key": "READARR_PORT",       "required": false, "description": "Readarr port (default: 8787)" },
+      { "key": "PROWLARR_PORT",      "required": false, "description": "Prowlarr port (default: 9696)" },
+      { "key": "BAZARR_PORT",        "required": false, "description": "Bazarr port (default: 6767)" },
+      { "key": "OVERSEERR_PORT",     "required": false, "description": "Overseerr port (default: 5055)" },
+      { "key": "PLEX_PORT",          "required": false, "description": "Plex port (default: 32400)" },
+      { "key": "TAUTULLI_PORT",      "required": false, "description": "Tautulli port (default: 8181)" },
+      { "key": "SABNZBD_PORT",       "required": false, "description": "SABnzbd port (default: 8080)" },
+      { "key": "FLARESOLVERR_PORT",  "required": false, "description": "FlareSolverr port (default: 8191)" },
+      { "key": "MAINTAINERR_PORT",   "required": false, "description": "Maintainerr port (default: 6246)" },
+      { "key": "NOTIFIARR_PORT",     "required": false, "description": "Notifiarr port (default: 5454)" },
+      { "key": "HOMARR_PORT",        "required": false, "description": "Homarr port (default: 7575)" }
     ]
   },
   "security": {

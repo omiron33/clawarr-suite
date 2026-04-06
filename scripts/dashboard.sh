@@ -14,6 +14,16 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+PROWLARR_PORT="${PROWLARR_PORT:-9696}"
+BAZARR_PORT="${BAZARR_PORT:-6767}"
+OVERSEERR_PORT="${OVERSEERR_PORT:-5055}"
+PLEX_PORT="${PLEX_PORT:-32400}"
+TAUTULLI_PORT="${TAUTULLI_PORT:-8181}"
+SABNZBD_PORT="${SABNZBD_PORT:-8080}"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -48,10 +58,10 @@ api_call() {
   local key="" port="" api_ver=""
   
   case "$app" in
-    radarr)   key="$RADARR_KEY"; port=7878; api_ver="v3" ;;
-    sonarr)   key="$SONARR_KEY"; port=8989; api_ver="v3" ;;
-    prowlarr) key="$PROWLARR_KEY"; port=9696; api_ver="v1" ;;
-    bazarr)   key="$BAZARR_KEY"; port=6767; api_ver="" ;;
+    radarr)   key="$RADARR_KEY"; port=$RADARR_PORT; api_ver="v3" ;;
+    sonarr)   key="$SONARR_KEY"; port=$SONARR_PORT; api_ver="v3" ;;
+    prowlarr) key="$PROWLARR_KEY"; port=$PROWLARR_PORT; api_ver="v1" ;;
+    bazarr)   key="$BAZARR_KEY"; port=$BAZARR_PORT; api_ver="" ;;
     *) echo "{}"; return 1 ;;
   esac
   
@@ -152,7 +162,7 @@ fi
 # SABnzbd stats
 if [[ -n "$SABNZBD_KEY" ]]; then
   echo "  • SABnzbd..."
-  SABNZBD_QUEUE=$(curl -sf "http://${HOST}:38080/api?apikey=${SABNZBD_KEY}&mode=queue&output=json" 2>/dev/null || echo '{}')
+  SABNZBD_QUEUE=$(curl -sf "http://${HOST}:${SABNZBD_PORT}/api?apikey=${SABNZBD_KEY}&mode=queue&output=json" 2>/dev/null || echo '{}')
   SABNZBD_SPEED=$(echo "$SABNZBD_QUEUE" | jq -r '.queue.speed // "0 B/s"')
   SABNZBD_SIZE_LEFT=$(echo "$SABNZBD_QUEUE" | jq -r '.queue.sizeleft // "0 B"')
   SABNZBD_TIME_LEFT=$(echo "$SABNZBD_QUEUE" | jq -r '.queue.timeleft // "0:00:00"')
@@ -163,9 +173,9 @@ fi
 # Tautulli stats
 if [[ -n "$TAUTULLI_KEY" ]]; then
   echo "  • Tautulli..."
-  TAUTULLI_ACTIVITY=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_activity" 2>/dev/null || echo '{}')
-  TAUTULLI_HISTORY=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=10" 2>/dev/null || echo '{}')
-  TAUTULLI_PLAYS=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_plays_by_date&time_range=30" 2>/dev/null | jq -r '.response.data.series_1_data // []')
+  TAUTULLI_ACTIVITY=$(curl -sf "http://${HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_activity" 2>/dev/null || echo '{}')
+  TAUTULLI_HISTORY=$(curl -sf "http://${HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=10" 2>/dev/null || echo '{}')
+  TAUTULLI_PLAYS=$(curl -sf "http://${HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_plays_by_date&time_range=30" 2>/dev/null | jq -r '.response.data.series_1_data // []')
   
   TAUTULLI_STREAMS=$(echo "$TAUTULLI_ACTIVITY" | jq -r '.response.data.stream_count // 0')
 fi
@@ -173,7 +183,7 @@ fi
 # Overseerr stats
 if [[ -n "$OVERSEERR_KEY" ]]; then
   echo "  • Overseerr..."
-  OVERSEERR_REQUESTS=$(curl -sf -H "X-Api-Key: $OVERSEERR_KEY" "http://${HOST}:5055/api/v1/request?take=100" 2>/dev/null || echo '{}')
+  OVERSEERR_REQUESTS=$(curl -sf -H "X-Api-Key: $OVERSEERR_KEY" "http://${HOST}:${OVERSEERR_PORT}/api/v1/request?take=100" 2>/dev/null || echo '{}')
   OVERSEERR_PENDING=$(echo "$OVERSEERR_REQUESTS" | jq '[.results[]? | select(.media.status == 2)] | length')
   OVERSEERR_TOTAL=$(echo "$OVERSEERR_REQUESTS" | jq '.results | length')
 fi
@@ -195,14 +205,14 @@ fi
 
 # Service health checks
 echo "  • Measuring service response times..."
-SONARR_RT=$(measure_response_time "http://${HOST}:8989/api/v3/health" "X-Api-Key: $SONARR_KEY")
-RADARR_RT=$(measure_response_time "http://${HOST}:7878/api/v3/health" "X-Api-Key: $RADARR_KEY")
-PLEX_RT=$(measure_response_time "http://${HOST}:32400/identity" "")
-TAUTULLI_RT=$(measure_response_time "http://${HOST}:8181/api/v2?cmd=arnold" "")
-SABNZBD_RT=$(measure_response_time "http://${HOST}:38080/api?mode=version" "")
-OVERSEERR_RT=$(measure_response_time "http://${HOST}:5055/api/v1/status" "")
-PROWLARR_RT=$(measure_response_time "http://${HOST}:9696/api/v1/health" "X-Api-Key: $PROWLARR_KEY")
-BAZARR_RT=$(measure_response_time "http://${HOST}:6767/api/system/status" "X-Api-Key: $BAZARR_KEY")
+SONARR_RT=$(measure_response_time "http://${HOST}:${SONARR_PORT}/api/v3/health" "X-Api-Key: $SONARR_KEY")
+RADARR_RT=$(measure_response_time "http://${HOST}:${RADARR_PORT}/api/v3/health" "X-Api-Key: $RADARR_KEY")
+PLEX_RT=$(measure_response_time "http://${HOST}:${PLEX_PORT}/identity" "")
+TAUTULLI_RT=$(measure_response_time "http://${HOST}:${TAUTULLI_PORT}/api/v2?cmd=arnold" "")
+SABNZBD_RT=$(measure_response_time "http://${HOST}:${SABNZBD_PORT}/api?mode=version" "")
+OVERSEERR_RT=$(measure_response_time "http://${HOST}:${OVERSEERR_PORT}/api/v1/status" "")
+PROWLARR_RT=$(measure_response_time "http://${HOST}:${PROWLARR_PORT}/api/v1/health" "X-Api-Key: $PROWLARR_KEY")
+BAZARR_RT=$(measure_response_time "http://${HOST}:${BAZARR_PORT}/api/system/status" "X-Api-Key: $BAZARR_KEY")
 
 # Calculate total storage
 TOTAL_SIZE_GB=$(echo "scale=1; $RADARR_SIZE_GB + $SONARR_SIZE_GB" | bc)

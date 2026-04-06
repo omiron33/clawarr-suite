@@ -5,6 +5,11 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+RADARR_PORT="${RADARR_PORT:-7878}"
+SONARR_PORT="${SONARR_PORT:-8989}"
+LIDARR_PORT="${LIDARR_PORT:-8686}"
+
 QUERY="${1:-}"
 TYPE="${2:-movie}"
 
@@ -51,7 +56,7 @@ case "$TYPE" in
     echo ""
     
     results=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" \
-      "http://${HOST}:7878/api/v3/movie/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
+      "http://${HOST}:${RADARR_PORT}/api/v3/movie/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
     
@@ -74,7 +79,7 @@ case "$TYPE" in
     echo ""
     
     results=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" \
-      "http://${HOST}:8989/api/v3/series/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
+      "http://${HOST}:${SONARR_PORT}/api/v3/series/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
     
@@ -97,7 +102,7 @@ case "$TYPE" in
     echo ""
     
     results=$(curl -sf -H "X-Api-Key: ${LIDARR_KEY}" \
-      "http://${HOST}:8686/api/v1/search?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
+      "http://${HOST}:${LIDARR_PORT}/api/v1/search?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
     

@@ -15,6 +15,10 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+TAUTULLI_PORT="${TAUTULLI_PORT:-8181}"
+PLEX_PORT="${PLEX_PORT:-32400}"
+
 HOST="${CLAWARR_HOST:-}"
 TAUTULLI_KEY="${TAUTULLI_KEY:-}"
 PLEX_TOKEN="${PLEX_TOKEN:-}"
@@ -45,7 +49,7 @@ tautulli_api() {
     return 1
   fi
   
-  local url="http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=${cmd}"
+  local url="http://${HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=${cmd}"
   if [[ -n "$params" ]]; then
     url="${url}&${params}"
   fi
@@ -63,7 +67,7 @@ plex_api() {
   fi
   
   curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" -H "Accept: application/json" \
-    "http://${HOST}:32400${endpoint}"
+    "http://${HOST}:${PLEX_PORT}${endpoint}"
 }
 
 # Command: activity (current streams)
