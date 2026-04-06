@@ -12,6 +12,9 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+TAUTULLI_PORT="${TAUTULLI_PORT:-8181}"
+
 # Simkl API Configuration
 # Note: You'll need to register your own app at https://simkl.com/settings/developer
 CLIENT_ID="${SIMKL_CLIENT_ID:-}"
@@ -320,7 +323,7 @@ cmd_sync() {
   echo "Fetching Plex watch history..."
   
   local tautulli_history
-  tautulli_history=$(curl -sf "http://${CLAWARR_HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=100")
+  tautulli_history=$(curl -sf "http://${CLAWARR_HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=100")
   
   if [[ -z "$tautulli_history" ]]; then
     echo "❌ Failed to fetch Tautulli history"

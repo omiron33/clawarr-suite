@@ -6,6 +6,17 @@ set -euo pipefail
 
 HOST="${1:-}"
 
+# Default ports (override via environment)
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+LIDARR_PORT="${LIDARR_PORT:-8686}"
+READARR_PORT="${READARR_PORT:-8787}"
+PROWLARR_PORT="${PROWLARR_PORT:-9696}"
+BAZARR_PORT="${BAZARR_PORT:-6767}"
+OVERSEERR_PORT="${OVERSEERR_PORT:-5055}"
+PLEX_PORT="${PLEX_PORT:-32400}"
+TAUTULLI_PORT="${TAUTULLI_PORT:-8181}"
+
 if [[ -z "$HOST" ]]; then
   echo "Usage: $0 <host-ip-or-hostname>"
   echo ""
@@ -19,15 +30,15 @@ fi
 
 # Service definitions: name:port:path
 SERVICES=(
-  "Sonarr:8989:/api/v3/system/status"
-  "Radarr:7878:/api/v3/system/status"
-  "Lidarr:8686:/api/v1/system/status"
-  "Readarr:8787:/api/v1/system/status"
-  "Prowlarr:9696:/api/v1/system/status"
-  "Bazarr:6767:/api/system/status"
-  "Overseerr:5055:/api/v1/status"
-  "Plex:32400:/identity"
-  "Tautulli:8181:/api/v2?cmd=get_tautulli_info"
+  "Sonarr:${SONARR_PORT}:/api/v3/system/status"
+  "Radarr:${RADARR_PORT}:/api/v3/system/status"
+  "Lidarr:${LIDARR_PORT}:/api/v1/system/status"
+  "Readarr:${READARR_PORT}:/api/v1/system/status"
+  "Prowlarr:${PROWLARR_PORT}:/api/v1/system/status"
+  "Bazarr:${BAZARR_PORT}:/api/system/status"
+  "Overseerr:${OVERSEERR_PORT}:/api/v1/status"
+  "Plex:${PLEX_PORT}:/identity"
+  "Tautulli:${TAUTULLI_PORT}:/api/v2?cmd=get_tautulli_info"
 )
 
 echo "🔍 Scanning $HOST for *arr services..."

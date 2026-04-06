@@ -18,6 +18,11 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+LIDARR_PORT="${LIDARR_PORT:-8686}"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -50,17 +55,17 @@ api_call() {
   case "$app" in
     radarr)
       key="$RADARR_KEY"
-      port=7878
+      port="${RADARR_PORT}"
       api_ver="v3"
       ;;
     sonarr)
       key="$SONARR_KEY"
-      port=8989
+      port="${SONARR_PORT}"
       api_ver="v3"
       ;;
     lidarr)
       key="$LIDARR_KEY"
-      port=8686
+      port="${LIDARR_PORT}"
       api_ver="v1"
       ;;
     *)

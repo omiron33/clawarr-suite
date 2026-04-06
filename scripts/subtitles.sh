@@ -10,6 +10,9 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+BAZARR_PORT="${BAZARR_PORT:-6767}"
+
 HOST="${CLAWARR_HOST:-}"
 BAZARR_KEY="${BAZARR_KEY:-}"
 
@@ -39,7 +42,7 @@ bazarr_api() {
   local method="${2:-GET}"
   local data="${3:-}"
   
-  local url="http://${HOST}:6767/api${endpoint}"
+  local url="http://${HOST}:${BAZARR_PORT}/api${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-API-Key: $BAZARR_KEY" "$url"

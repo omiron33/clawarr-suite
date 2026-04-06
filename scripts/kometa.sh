@@ -8,6 +8,10 @@ set -euo pipefail
 DOCKER_HOST_SSH="${KOMETA_SSH:-}"
 DOCKER_CMD="${KOMETA_DOCKER_CMD:-docker}"
 CONTAINER="${KOMETA_CONTAINER:-kometa}"
+
+# Default ports (override via environment)
+PLEX_PORT="${PLEX_PORT:-32400}"
+
 HOST="${CLAWARR_HOST:-}"
 PLEX_TOKEN="${PLEX_TOKEN:-}"
 
@@ -88,13 +92,13 @@ cmd_collections() {
   # Query Plex for collections
   local sections
   sections=$(curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" \
-    "http://${HOST}:32400/library/sections" 2>/dev/null)
+    "http://${HOST}:${PLEX_PORT}/library/sections" 2>/dev/null)
 
   echo "$sections" | jq -r '.MediaContainer.Directory[] | "\(.key) \(.title)"' 2>/dev/null | while read -r key title; do
     echo "  📁 ${title}:"
     local cols
     cols=$(curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" \
-      "http://${HOST}:32400/library/sections/${key}/collections" 2>/dev/null)
+      "http://${HOST}:${PLEX_PORT}/library/sections/${key}/collections" 2>/dev/null)
     local count
     count=$(echo "$cols" | jq '.MediaContainer.size // 0' 2>/dev/null)
     if [[ "$count" != "0" && "$count" != "null" ]]; then

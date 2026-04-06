@@ -12,6 +12,9 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+SABNZBD_PORT="${SABNZBD_PORT:-8080}"
+
 HOST="${CLAWARR_HOST:-}"
 SABNZBD_KEY="${SABNZBD_KEY:-}"
 
@@ -41,7 +44,7 @@ sabnzbd_api() {
   shift
   local params="$*"
   
-  local url="http://${HOST}:38080/api?apikey=${SABNZBD_KEY}&mode=${mode}&output=json"
+  local url="http://${HOST}:${SABNZBD_PORT}/api?apikey=${SABNZBD_KEY}&mode=${mode}&output=json"
   if [[ -n "$params" ]]; then
     url="${url}&${params}"
   fi

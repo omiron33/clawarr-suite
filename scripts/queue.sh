@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -30,7 +34,7 @@ echo ""
 if [[ -n "$RADARR_KEY" ]]; then
   echo "=== Radarr Queue ==="
   
-  queue=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:7878/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:${RADARR_PORT}/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   count=$(echo "$queue" | jq '.records | length')
   
@@ -45,7 +49,7 @@ fi
 if [[ -n "$SONARR_KEY" ]]; then
   echo "=== Sonarr Queue ==="
   
-  queue=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:8989/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:${SONARR_PORT}/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   count=$(echo "$queue" | jq '.records | length')
   

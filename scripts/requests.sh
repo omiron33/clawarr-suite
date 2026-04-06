@@ -11,6 +11,9 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+OVERSEERR_PORT="${OVERSEERR_PORT:-5055}"
+
 HOST="${CLAWARR_HOST:-}"
 OVERSEERR_KEY="${OVERSEERR_KEY:-}"
 
@@ -40,7 +43,7 @@ overseerr_api() {
   local endpoint=$2
   local data="${3:-}"
   
-  local url="http://${HOST}:5055/api/v1${endpoint}"
+  local url="http://${HOST}:${OVERSEERR_PORT}/api/v1${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-Api-Key: $OVERSEERR_KEY" "$url"

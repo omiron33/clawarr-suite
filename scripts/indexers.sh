@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+PROWLARR_PORT="${PROWLARR_PORT:-9696}"
+
 HOST="${CLAWARR_HOST:-}"
 PROWLARR_KEY="${PROWLARR_KEY:-}"
 
@@ -38,7 +41,7 @@ prowlarr_api() {
   local endpoint=$2
   local data="${3:-}"
   
-  local url="http://${HOST}:9696/api/v1${endpoint}"
+  local url="http://${HOST}:${PROWLARR_PORT}/api/v1${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
     curl -sf -H "X-Api-Key: $PROWLARR_KEY" "$url"
