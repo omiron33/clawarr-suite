@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -104,12 +108,12 @@ check_queue_warnings() {
 
 if [[ -n "$RADARR_KEY" ]]; then
   echo "Radarr:"
-  check_queue_warnings "Radarr" 7878 "$RADARR_KEY"
+  check_queue_warnings "Radarr" "$RADARR_PORT" "$RADARR_KEY"
 fi
 
 if [[ -n "$SONARR_KEY" ]]; then
   echo "Sonarr:"
-  check_queue_warnings "Sonarr" 8989 "$SONARR_KEY"
+  check_queue_warnings "Sonarr" "$SONARR_PORT" "$SONARR_KEY"
 fi
 
 if [[ -z "$RADARR_KEY" && -z "$SONARR_KEY" ]]; then
@@ -144,13 +148,13 @@ check_failed_imports() {
 
 if [[ -n "$RADARR_KEY" ]]; then
   echo "Radarr:"
-  check_failed_imports "Radarr" 7878 "$RADARR_KEY"
+  check_failed_imports "Radarr" "$RADARR_PORT" "$RADARR_KEY"
   echo ""
 fi
 
 if [[ -n "$SONARR_KEY" ]]; then
   echo "Sonarr:"
-  check_failed_imports "Sonarr" 8989 "$SONARR_KEY"
+  check_failed_imports "Sonarr" "$SONARR_PORT" "$SONARR_KEY"
   echo ""
 fi
 
@@ -159,13 +163,13 @@ echo "=== Disk Space ==="
 
 # Try to get root folders from Radarr/Sonarr
 if [[ -n "$RADARR_KEY" ]]; then
-  folders=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:7878/api/v3/rootfolder" 2>/dev/null || echo '[]')
+  folders=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:${RADARR_PORT}/api/v3/rootfolder" 2>/dev/null || echo '[]')
   
   echo "$folders" | jq -r '.[] | "  Radarr: \(.path) - \(.freeSpace / 1024 / 1024 / 1024 | floor)GB free"' 2>/dev/null
 fi
 
 if [[ -n "$SONARR_KEY" ]]; then
-  folders=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:8989/api/v3/rootfolder" 2>/dev/null || echo '[]')
+  folders=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:${SONARR_PORT}/api/v3/rootfolder" 2>/dev/null || echo '[]')
   
   echo "$folders" | jq -r '.[] | "  Sonarr: \(.path) - \(.freeSpace / 1024 / 1024 / 1024 | floor)GB free"' 2>/dev/null
 fi

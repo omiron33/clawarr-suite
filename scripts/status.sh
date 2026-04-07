@@ -5,6 +5,22 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+LIDARR_PORT="${LIDARR_PORT:-8686}"
+READARR_PORT="${READARR_PORT:-8787}"
+PROWLARR_PORT="${PROWLARR_PORT:-9696}"
+BAZARR_PORT="${BAZARR_PORT:-6767}"
+OVERSEERR_PORT="${OVERSEERR_PORT:-5055}"
+PLEX_PORT="${PLEX_PORT:-32400}"
+TAUTULLI_PORT="${TAUTULLI_PORT:-8181}"
+SABNZBD_PORT="${SABNZBD_PORT:-8080}"
+FLARESOLVERR_PORT="${FLARESOLVERR_PORT:-8191}"
+MAINTAINERR_PORT="${MAINTAINERR_PORT:-6246}"
+NOTIFIARR_PORT="${NOTIFIARR_PORT:-5454}"
+HOMARR_PORT="${HOMARR_PORT:-7575}"
+
 # Accept args or use environment variables
 HOST="${1:-${CLAWARR_HOST:-}}"
 SONARR_KEY="${2:-${SONARR_KEY:-}}"
@@ -75,16 +91,16 @@ check_service() {
 }
 
 # Check each service
-[[ -n "$SONARR_KEY" ]] && check_service "Sonarr" 8989 "$SONARR_KEY" "/api/v3/health"
-[[ -n "$RADARR_KEY" ]] && check_service "Radarr" 7878 "$RADARR_KEY" "/api/v3/health"
-[[ -n "$LIDARR_KEY" ]] && check_service "Lidarr" 8686 "$LIDARR_KEY" "/api/v1/health"
-[[ -n "$READARR_KEY" ]] && check_service "Readarr" 8787 "$READARR_KEY" "/api/v1/health"
-[[ -n "$PROWLARR_KEY" ]] && check_service "Prowlarr" 9696 "$PROWLARR_KEY" "/api/v1/health"
-[[ -n "$BAZARR_KEY" ]] && check_service "Bazarr" 6767 "$BAZARR_KEY" "/api/system/health"
+[[ -n "$SONARR_KEY" ]] && check_service "Sonarr" "$SONARR_PORT" "$SONARR_KEY" "/api/v3/health"
+[[ -n "$RADARR_KEY" ]] && check_service "Radarr" "$RADARR_PORT" "$RADARR_KEY" "/api/v3/health"
+[[ -n "$LIDARR_KEY" ]] && check_service "Lidarr" "$LIDARR_PORT" "$LIDARR_KEY" "/api/v1/health"
+[[ -n "$READARR_KEY" ]] && check_service "Readarr" "$READARR_PORT" "$READARR_KEY" "/api/v1/health"
+[[ -n "$PROWLARR_KEY" ]] && check_service "Prowlarr" "$PROWLARR_PORT" "$PROWLARR_KEY" "/api/v1/health"
+[[ -n "$BAZARR_KEY" ]] && check_service "Bazarr" "$BAZARR_PORT" "$BAZARR_KEY" "/api/system/health"
 
 # Overseerr uses different header
 if [[ -n "$OVERSEERR_KEY" ]]; then
-  if response=$(curl -sf -H "X-Api-Key: ${OVERSEERR_KEY}" "http://${HOST}:5055/api/v1/status" 2>&1); then
+  if response=$(curl -sf -H "X-Api-Key: ${OVERSEERR_KEY}" "http://${HOST}:${OVERSEERR_PORT}/api/v1/status" 2>&1); then
     echo "✅ Overseerr - Running"
   else
     echo "❌ Overseerr - Connection failed"
@@ -93,7 +109,7 @@ fi
 
 # Plex uses token
 if [[ -n "$PLEX_TOKEN" ]]; then
-  if curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" "http://${HOST}:32400/identity" &>/dev/null; then
+  if curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" "http://${HOST}:${PLEX_PORT}/identity" &>/dev/null; then
     echo "✅ Plex - Running"
   else
     echo "❌ Plex - Connection failed"
@@ -102,7 +118,7 @@ fi
 
 # Tautulli
 if [[ -n "$TAUTULLI_KEY" ]]; then
-  if response=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=status" 2>&1); then
+  if response=$(curl -sf "http://${HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=status" 2>&1); then
     echo "✅ Tautulli - Running"
   else
     echo "❌ Tautulli - Connection failed"
@@ -112,7 +128,7 @@ fi
 # SABnzbd
 SABNZBD_KEY="${SABNZBD_KEY:-}"
 if [[ -n "$SABNZBD_KEY" ]]; then
-  if curl -sf "http://${HOST}:${SABNZBD_PORT:-38080}/api?mode=version&apikey=${SABNZBD_KEY}" &>/dev/null; then
+  if curl -sf "http://${HOST}:${SABNZBD_PORT}/api?mode=version&apikey=${SABNZBD_KEY}" &>/dev/null; then
     echo "✅ SABnzbd - Running"
   else
     echo "❌ SABnzbd - Connection failed"
@@ -124,23 +140,23 @@ echo ""
 echo "🔧 Companion Services:"
 
 # FlareSolverr
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:8191" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:${FLARESOLVERR_PORT}" 2>/dev/null; then
   echo "✅ FlareSolverr - Running"
 fi
 
 # Maintainerr
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:6246" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:${MAINTAINERR_PORT}" 2>/dev/null; then
   echo "✅ Maintainerr - Running"
 fi
 
 # Notifiarr
 NOTIFIARR_KEY="${NOTIFIARR_KEY:-}"
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:5454" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:${NOTIFIARR_PORT}" 2>/dev/null; then
   echo "✅ Notifiarr - Running"
 fi
 
 # Homarr
-if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:7575" 2>/dev/null; then
+if curl -sf -o /dev/null --connect-timeout 3 "http://${HOST}:${HOMARR_PORT}" 2>/dev/null; then
   echo "✅ Homarr - Running"
 fi
 

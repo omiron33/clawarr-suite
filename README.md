@@ -99,7 +99,7 @@ Just talk to your agent naturally:
 | **Overseerr** | 5055 | `requests.sh` |
 | **Plex** | 32400 | `analytics.sh` |
 | **Tautulli** | 8181 | `analytics.sh` |
-| **SABnzbd** | 38080 | `downloads.sh` |
+| **SABnzbd** | 8080 | `downloads.sh` |
 
 ### Companion Services
 | Service | Port | Script | Purpose |

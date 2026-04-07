@@ -55,6 +55,11 @@
 
 set -euo pipefail
 
+# Default ports (override via environment)
+TAUTULLI_PORT="${TAUTULLI_PORT:-8181}"
+SONARR_PORT="${SONARR_PORT:-8989}"
+RADARR_PORT="${RADARR_PORT:-7878}"
+
 # API Configuration
 CLIENT_ID="${TRAKT_CLIENT_ID:-}"
 CLIENT_SECRET="${TRAKT_CLIENT_SECRET:-}"
@@ -1179,7 +1184,7 @@ cmd_sync_plex() {
   
   # Get watch history from Tautulli
   local tautulli_history
-  tautulli_history=$(curl -sf "http://${CLAWARR_HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=500")
+  tautulli_history=$(curl -sf "http://${CLAWARR_HOST}:${TAUTULLI_PORT}/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=500")
   
   if [[ -z "$tautulli_history" ]]; then
     echo "❌ Failed to fetch Tautulli history"
@@ -1506,7 +1511,7 @@ cmd_traktarr_config() {
     # Get required values
     echo -n "Radarr URL (http://HOST:7878): "
     read -r radarr_url
-    radarr_url="${radarr_url:-http://${CLAWARR_HOST:-localhost}:7878}"
+    radarr_url="${radarr_url:-http://${CLAWARR_HOST:-localhost}:${RADARR_PORT}}"
     
     echo -n "Radarr API Key: "
     read -r radarr_key
@@ -1514,7 +1519,7 @@ cmd_traktarr_config() {
     
     echo -n "Sonarr URL (http://HOST:8989): "
     read -r sonarr_url
-    sonarr_url="${sonarr_url:-http://${CLAWARR_HOST:-localhost}:8989}"
+    sonarr_url="${sonarr_url:-http://${CLAWARR_HOST:-localhost}:${SONARR_PORT}}"
     
     echo -n "Sonarr API Key: "
     read -r sonarr_key
@@ -1746,7 +1751,7 @@ cmd_retraktarr_config() {
     # Get required values
     echo -n "Radarr URL (http://HOST:7878): "
     read -r radarr_url
-    radarr_url="${radarr_url:-http://${CLAWARR_HOST:-localhost}:7878}"
+    radarr_url="${radarr_url:-http://${CLAWARR_HOST:-localhost}:${RADARR_PORT}}"
     
     echo -n "Radarr API Key: "
     read -r radarr_key
@@ -1754,7 +1759,7 @@ cmd_retraktarr_config() {
     
     echo -n "Sonarr URL (http://HOST:8989): "
     read -r sonarr_url
-    sonarr_url="${sonarr_url:-http://${CLAWARR_HOST:-localhost}:8989}"
+    sonarr_url="${sonarr_url:-http://${CLAWARR_HOST:-localhost}:${SONARR_PORT}}"
     
     echo -n "Sonarr API Key: "
     read -r sonarr_key
