@@ -14,6 +14,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -69,13 +72,13 @@ api_call() {
   local url="http://${HOST}:${port}/api/${api_ver}${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
-    curl -sf -H "X-Api-Key: $key" "$url"
+    arr_api header X-Api-Key "$key" -sf "$url"
   elif [[ "$method" == "POST" ]]; then
-    curl -sf -X POST -H "X-Api-Key: $key" -H "Content-Type: application/json" -d "$data" "$url"
+    arr_api header X-Api-Key "$key" -sf -X POST -H "Content-Type: application/json" -d "$data" "$url"
   elif [[ "$method" == "DELETE" ]]; then
-    curl -sf -X DELETE -H "X-Api-Key: $key" "$url"
+    arr_api header X-Api-Key "$key" -sf -X DELETE "$url"
   elif [[ "$method" == "PUT" ]]; then
-    curl -sf -X PUT -H "X-Api-Key: $key" -H "Content-Type: application/json" -d "$data" "$url"
+    arr_api header X-Api-Key "$key" -sf -X PUT -H "Content-Type: application/json" -d "$data" "$url"
   fi
 }
 

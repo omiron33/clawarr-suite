@@ -4,6 +4,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -30,7 +33,7 @@ echo ""
 if [[ -n "$RADARR_KEY" ]]; then
   echo "=== Radarr Queue ==="
   
-  queue=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:7878/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(arr_api header X-Api-Key "${RADARR_KEY}" -sf "http://${HOST}:7878/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   count=$(echo "$queue" | jq '.records | length')
   
@@ -45,7 +48,7 @@ fi
 if [[ -n "$SONARR_KEY" ]]; then
   echo "=== Sonarr Queue ==="
   
-  queue=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:8989/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(arr_api header X-Api-Key "${SONARR_KEY}" -sf "http://${HOST}:8989/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   count=$(echo "$queue" | jq '.records | length')
   

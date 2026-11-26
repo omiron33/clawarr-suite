@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 # Accept args or use environment variables
 HOST="${1:-${CLAWARR_HOST:-}}"
 SONARR_KEY="${2:-${SONARR_KEY:-}}"
@@ -53,7 +56,7 @@ check_service() {
   local url="http://${HOST}:${port}${api_path}"
   local response
   
-  if ! response=$(curl -sf -H "${key_header}: ${api_key}" "$url" 2>&1); then
+  if ! response=$(arr_api header "${key_header}" "${api_key}" -sf "$url" 2>&1); then
     echo "❌ $name - Connection failed"
     return
   fi
@@ -84,7 +87,7 @@ check_service() {
 
 # Overseerr uses different header
 if [[ -n "$OVERSEERR_KEY" ]]; then
-  if response=$(curl -sf -H "X-Api-Key: ${OVERSEERR_KEY}" "http://${HOST}:5055/api/v1/status" 2>&1); then
+  if response=$(arr_api header X-Api-Key "${OVERSEERR_KEY}" -sf "http://${HOST}:5055/api/v1/status" 2>&1); then
     echo "✅ Overseerr - Running"
   else
     echo "❌ Overseerr - Connection failed"
@@ -93,7 +96,7 @@ fi
 
 # Plex uses token
 if [[ -n "$PLEX_TOKEN" ]]; then
-  if curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" "http://${HOST}:32400/identity" &>/dev/null; then
+  if arr_api header X-Plex-Token "${PLEX_TOKEN}" -sf "http://${HOST}:32400/identity" &>/dev/null; then
     echo "✅ Plex - Running"
   else
     echo "❌ Plex - Connection failed"
@@ -102,7 +105,7 @@ fi
 
 # Tautulli
 if [[ -n "$TAUTULLI_KEY" ]]; then
-  if response=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=status" 2>&1); then
+  if response=$(arr_api query apikey "${TAUTULLI_KEY}" -sf "http://${HOST}:8181/api/v2?cmd=status" 2>&1); then
     echo "✅ Tautulli - Running"
   else
     echo "❌ Tautulli - Connection failed"
@@ -112,7 +115,7 @@ fi
 # SABnzbd
 SABNZBD_KEY="${SABNZBD_KEY:-}"
 if [[ -n "$SABNZBD_KEY" ]]; then
-  if curl -sf "http://${HOST}:${SABNZBD_PORT:-38080}/api?mode=version&apikey=${SABNZBD_KEY}" &>/dev/null; then
+  if arr_api query apikey "${SABNZBD_KEY}" -sf "http://${HOST}:${SABNZBD_PORT:-38080}/api?mode=version" &>/dev/null; then
     echo "✅ SABnzbd - Running"
   else
     echo "❌ SABnzbd - Connection failed"

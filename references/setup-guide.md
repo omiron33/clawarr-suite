@@ -355,10 +355,11 @@ sudo systemctl enable --now sonarr
 ### Install Others
 
 **Lidarr:**
-```bash
-curl -s https://lidarr.audio/install.sh | sudo bash
-sudo systemctl enable --now lidarr
-```
+Follow the official Lidarr installation guide for your platform:
+<https://wiki.servarr.com/lidarr/installation>
+
+> Avoid piping a remote script straight into `sudo bash`. If you use an install
+> script, download it first, read it, then run it.
 
 **Prowlarr:**
 ```bash

@@ -4,6 +4,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -93,7 +96,7 @@ check_queue_warnings() {
     return
   fi
   
-  queue=$(curl -sf -H "X-Api-Key: ${api_key}" "http://${HOST}:${port}/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
+  queue=$(arr_api header X-Api-Key "${api_key}" -sf "http://${HOST}:${port}/api/v3/queue" 2>/dev/null || echo '{"records":[]}')
   
   warnings=$(echo "$queue" | jq -r '.records[] | select(.status == "warning" or .status == "failed") | "  ⚠️  \(.title): \(.statusMessages[0].messages[0] // .status)"' 2>/dev/null)
   
@@ -130,7 +133,7 @@ check_failed_imports() {
     return
   fi
   
-  history=$(curl -sf -H "X-Api-Key: ${api_key}" \
+  history=$(arr_api header X-Api-Key "${api_key}" -sf \
     "http://${HOST}:${port}/api/v3/history?pageSize=20&eventType=3" 2>/dev/null || echo '{"records":[]}')
   
   failures=$(echo "$history" | jq -r '.records[] | select(.eventType == "downloadFailed") | "  ❌ \(.sourceTitle): \(.data.message // "Unknown error")"' 2>/dev/null | head -5)
@@ -159,13 +162,13 @@ echo "=== Disk Space ==="
 
 # Try to get root folders from Radarr/Sonarr
 if [[ -n "$RADARR_KEY" ]]; then
-  folders=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" "http://${HOST}:7878/api/v3/rootfolder" 2>/dev/null || echo '[]')
+  folders=$(arr_api header X-Api-Key "${RADARR_KEY}" -sf "http://${HOST}:7878/api/v3/rootfolder" 2>/dev/null || echo '[]')
   
   echo "$folders" | jq -r '.[] | "  Radarr: \(.path) - \(.freeSpace / 1024 / 1024 / 1024 | floor)GB free"' 2>/dev/null
 fi
 
 if [[ -n "$SONARR_KEY" ]]; then
-  folders=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" "http://${HOST}:8989/api/v3/rootfolder" 2>/dev/null || echo '[]')
+  folders=$(arr_api header X-Api-Key "${SONARR_KEY}" -sf "http://${HOST}:8989/api/v3/rootfolder" 2>/dev/null || echo '[]')
   
   echo "$folders" | jq -r '.[] | "  Sonarr: \(.path) - \(.freeSpace / 1024 / 1024 / 1024 | floor)GB free"' 2>/dev/null
 fi

@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 API_KEY="${NOTIFIARR_KEY:-}"
 BASE_URL=""
@@ -22,8 +25,7 @@ api() {
   local endpoint="$2"
   shift 2
   if [[ -n "$API_KEY" ]]; then
-    curl -sf -X "$method" \
-      -H "x-api-key: ${API_KEY}" \
+    arr_api header x-api-key "${API_KEY}" -sf -X "$method" \
       -H "Content-Type: application/json" \
       "${BASE_URL}/api${endpoint}" "$@" 2>/dev/null
   else

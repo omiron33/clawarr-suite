@@ -11,6 +11,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 TAUTULLI_KEY="${TAUTULLI_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -45,7 +48,7 @@ cmd_export() {
     echo "Fetching watch history from Tautulli..."
     
     local history
-    history=$(curl -sf "http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=10000&media_type=movie")
+    history=$(arr_api query apikey "${TAUTULLI_KEY}" -sf "http://${HOST}:8181/api/v2?cmd=get_history&length=10000&media_type=movie")
     
     if [[ -z "$history" ]]; then
       echo "❌ Failed to fetch Tautulli history"
@@ -86,7 +89,7 @@ cmd_export() {
     echo "Fetching movie library from Radarr..."
     
     local movies
-    movies=$(curl -sf -H "X-Api-Key: $RADARR_KEY" "http://${HOST}:7878/api/v3/movie")
+    movies=$(arr_api header X-Api-Key "$RADARR_KEY" -sf "http://${HOST}:7878/api/v3/movie")
     
     if [[ -z "$movies" ]]; then
       echo "❌ Failed to fetch Radarr library"

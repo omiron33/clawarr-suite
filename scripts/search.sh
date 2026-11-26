@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 QUERY="${1:-}"
 TYPE="${2:-movie}"
 
@@ -50,7 +53,7 @@ case "$TYPE" in
     echo "🎬 Searching Radarr for: $QUERY"
     echo ""
     
-    results=$(curl -sf -H "X-Api-Key: ${RADARR_KEY}" \
+    results=$(arr_api header X-Api-Key "${RADARR_KEY}" -sf \
       "http://${HOST}:7878/api/v3/movie/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
@@ -73,7 +76,7 @@ case "$TYPE" in
     echo "📺 Searching Sonarr for: $QUERY"
     echo ""
     
-    results=$(curl -sf -H "X-Api-Key: ${SONARR_KEY}" \
+    results=$(arr_api header X-Api-Key "${SONARR_KEY}" -sf \
       "http://${HOST}:8989/api/v3/series/lookup?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')
@@ -96,7 +99,7 @@ case "$TYPE" in
     echo "🎵 Searching Lidarr for: $QUERY"
     echo ""
     
-    results=$(curl -sf -H "X-Api-Key: ${LIDARR_KEY}" \
+    results=$(arr_api header X-Api-Key "${LIDARR_KEY}" -sf \
       "http://${HOST}:8686/api/v1/search?term=${ENCODED_QUERY}" 2>/dev/null || echo '[]')
     
     count=$(echo "$results" | jq 'length')

@@ -18,7 +18,7 @@ metadata:
             "optionalBins": ["bc", "sed", "docker", "ssh"],
             "env":
               [
-                "CLAWARR_HOST",
+                "CLAWARR_HOST", "CLAWARR_ALLOWED_HOSTS",
                 "SONARR_KEY", "RADARR_KEY", "LIDARR_KEY", "READARR_KEY",
                 "PROWLARR_KEY", "BAZARR_KEY", "OVERSEERR_KEY",
                 "PLEX_TOKEN", "TAUTULLI_KEY", "SABNZBD_KEY", "NOTIFIARR_KEY",
@@ -33,7 +33,7 @@ metadata:
           {
             "networkScope": "local-lan-and-user-configured-hosts",
             "externalHosts": ["api.trakt.tv", "api.simkl.com", "letterboxd.com", "raw.githubusercontent.com"],
-            "secretsPolicy": "API keys sourced from environment variables only; never hardcoded; tokens saved to ~/.config/clawarr/ with 600 permissions",
+            "secretsPolicy": "API keys sourced from environment variables only; never hardcoded; self-hosted API calls go through scripts/lib.sh arr_api (destination allowlist, secrets via curl config on stdin, no redirects); tokens saved to ~/.config/clawarr/ with 600 permissions",
             "destructiveActions": "none by default; delete/remove operations require explicit user invocation; never triggered automatically",
             "dockerSshScope": "docker and ssh invoked only for companion service observability when *_SSH env vars are set by the user",
             "noTelemetry": true
@@ -74,7 +74,7 @@ If `docker` and `ssh` are not installed or no `*_SSH` env vars are configured, c
 ### Environment variables
 All variables are optional — the skill degrades gracefully when a service key is absent. See the **Configuration** section for details on each variable.
 
-**Core services:** `CLAWARR_HOST`, `SONARR_KEY`, `RADARR_KEY`, `LIDARR_KEY`, `READARR_KEY`, `PROWLARR_KEY`, `BAZARR_KEY`, `OVERSEERR_KEY`, `PLEX_TOKEN`, `TAUTULLI_KEY`, `SABNZBD_KEY`, `NOTIFIARR_KEY`
+**Core services:** `CLAWARR_HOST`, `CLAWARR_ALLOWED_HOSTS`, `SONARR_KEY`, `RADARR_KEY`, `LIDARR_KEY`, `READARR_KEY`, `PROWLARR_KEY`, `BAZARR_KEY`, `OVERSEERR_KEY`, `PLEX_TOKEN`, `TAUTULLI_KEY`, `SABNZBD_KEY`, `NOTIFIARR_KEY`
 
 **Media trackers (optional):** `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET`, `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET`, `LETTERBOXD_API_KEY`
 
@@ -103,6 +103,13 @@ Tokens are saved locally to `~/.config/clawarr/` with `600` permissions (user re
 - No telemetry/exfiltration paths: scripts do not transmit credentials or library data to third-party endpoints.
 - Destructive behavior is opt-in: delete/remove actions require explicit command invocation by the user/agent.
 - Setup logic avoids dynamic `eval` and uses explicit variable mapping for scanner-friendly shell behavior.
+- **Single credentialed HTTP path:** every self-hosted API call goes through `arr_api` in `scripts/lib.sh`. It:
+  - only sends a key to `CLAWARR_HOST`, hosts listed in `CLAWARR_ALLOWED_HOSTS`, or loopback/private IP literals (10/8, 172.16/12, 192.168/16, 100.64/10, 169.254/16, `::1`, `fc00::/7`, `fe80::/10`). Anything else is refused before a request is made;
+  - rejects URLs with userinfo (`http://lan-ip@other-host/`), multiple URLs, non-http(s) schemes, and `-L`/`-K`;
+  - passes the key to curl through a config on stdin (`curl -K -`), so it never appears in `ps` or shell history;
+  - never follows redirects (`--max-redirs 0`), so a server can't bounce the key to another host.
+- For ad-hoc API calls, use `scripts/api.sh <service> [METHOD] <path> [json]` instead of raw `curl` with a key, e.g. `scripts/api.sh radarr /api/v3/queue | jq`.
+- If your services live on a public hostname (seedbox, VPS), add it explicitly: `export CLAWARR_ALLOWED_HOSTS="seedbox.example.com"`.
 
 ## Quick Start
 
@@ -448,6 +455,8 @@ unpackerr.sh restart              # Restart container
 **Core Services:**
 ```bash
 export CLAWARR_HOST=192.168.1.100
+# Optional: extra non-private hosts allowed to receive API keys (comma/space separated)
+# export CLAWARR_ALLOWED_HOSTS="seedbox.example.com"
 export SONARR_KEY=abc123...
 export RADARR_KEY=def456...
 export LIDARR_KEY=ghi789...

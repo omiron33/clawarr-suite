@@ -12,6 +12,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 SABNZBD_KEY="${SABNZBD_KEY:-}"
 
@@ -41,12 +44,12 @@ sabnzbd_api() {
   shift
   local params="$*"
   
-  local url="http://${HOST}:38080/api?apikey=${SABNZBD_KEY}&mode=${mode}&output=json"
+  local url="http://${HOST}:38080/api?mode=${mode}&output=json"
   if [[ -n "$params" ]]; then
     url="${url}&${params}"
   fi
   
-  curl -sf "$url"
+  arr_api query apikey "$SABNZBD_KEY" -sf "$url"
 }
 
 # Command: active
