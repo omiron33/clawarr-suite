@@ -19,6 +19,7 @@
     ],
     "env": [
       { "key": "CLAWARR_HOST",       "required": false, "description": "Primary host IP/hostname for *arr services (default: 192.168.1.100)" },
+      { "key": "CLAWARR_ALLOWED_HOSTS", "required": false, "description": "Extra hostnames (comma/space separated) allowed to receive API keys besides CLAWARR_HOST and private/loopback IPs" },
       { "key": "SONARR_KEY",         "required": false, "description": "Sonarr API key — needed for TV library operations" },
       { "key": "RADARR_KEY",         "required": false, "description": "Radarr API key — needed for movie library operations" },
       { "key": "LIDARR_KEY",         "required": false, "description": "Lidarr API key — needed for music library operations" },
@@ -49,7 +50,7 @@
       "letterboxd.com — Letterboxd public profile reads; no write API",
       "raw.githubusercontent.com / TRaSH-Guides — Recyclarr profile downloads (only when recyclarr.sh sync is run)"
     ],
-    "secretsPolicy": "API keys sourced from environment variables only; never hardcoded; tokens saved locally to ~/.config/clawarr/ with 600 permissions",
+    "secretsPolicy": "API keys sourced from environment variables only; never hardcoded; all self-hosted API calls go through scripts/lib.sh arr_api, which only sends keys to CLAWARR_HOST, CLAWARR_ALLOWED_HOSTS or private/loopback addresses, passes them via curl config on stdin (not argv) and never follows redirects; tokens saved locally to ~/.config/clawarr/ with 600 permissions",
     "destructiveActions": "None by default. Delete/remove operations (manage.sh remove, maintainerr.sh run, Radarr/Sonarr delete APIs) require explicit user invocation and are never triggered automatically.",
     "dockerSshScope": "docker and ssh are only invoked for companion service observability (status, logs, restart) when the corresponding *_SSH env variables are set by the user. Scripts do not scan for containers or discover hosts autonomously.",
     "noTelemetry": true

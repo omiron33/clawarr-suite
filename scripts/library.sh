@@ -18,6 +18,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 SONARR_KEY="${SONARR_KEY:-}"
 RADARR_KEY="${RADARR_KEY:-}"
@@ -74,7 +77,7 @@ api_call() {
     return 1
   fi
   
-  curl -sf -H "X-Api-Key: $key" "http://${HOST}:${port}/api/${api_ver}${endpoint}"
+  arr_api header X-Api-Key "$key" -sf "http://${HOST}:${port}/api/${api_ver}${endpoint}"
 }
 
 # Command: stats

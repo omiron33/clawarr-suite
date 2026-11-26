@@ -11,6 +11,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 OVERSEERR_KEY="${OVERSEERR_KEY:-}"
 
@@ -43,9 +46,9 @@ overseerr_api() {
   local url="http://${HOST}:5055/api/v1${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
-    curl -sf -H "X-Api-Key: $OVERSEERR_KEY" "$url"
+    arr_api header X-Api-Key "$OVERSEERR_KEY" -sf "$url"
   elif [[ "$method" == "POST" ]]; then
-    curl -sf -X POST -H "X-Api-Key: $OVERSEERR_KEY" -H "Content-Type: application/json" -d "$data" "$url"
+    arr_api header X-Api-Key "$OVERSEERR_KEY" -sf -X POST -H "Content-Type: application/json" -d "$data" "$url"
   fi
 }
 

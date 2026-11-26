@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 DOCKER_HOST_SSH="${KOMETA_SSH:-}"
 DOCKER_CMD="${KOMETA_DOCKER_CMD:-docker}"
 CONTAINER="${KOMETA_CONTAINER:-kometa}"
@@ -87,13 +90,13 @@ cmd_collections() {
 
   # Query Plex for collections
   local sections
-  sections=$(curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" \
+  sections=$(arr_api header X-Plex-Token "${PLEX_TOKEN}" -sf \
     "http://${HOST}:32400/library/sections" 2>/dev/null)
 
   echo "$sections" | jq -r '.MediaContainer.Directory[] | "\(.key) \(.title)"' 2>/dev/null | while read -r key title; do
     echo "  📁 ${title}:"
     local cols
-    cols=$(curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" \
+    cols=$(arr_api header X-Plex-Token "${PLEX_TOKEN}" -sf \
       "http://${HOST}:32400/library/sections/${key}/collections" 2>/dev/null)
     local count
     count=$(echo "$cols" | jq '.MediaContainer.size // 0' 2>/dev/null)

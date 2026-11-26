@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 PROWLARR_KEY="${PROWLARR_KEY:-}"
 
@@ -41,9 +44,9 @@ prowlarr_api() {
   local url="http://${HOST}:9696/api/v1${endpoint}"
   
   if [[ "$method" == "GET" ]]; then
-    curl -sf -H "X-Api-Key: $PROWLARR_KEY" "$url"
+    arr_api header X-Api-Key "$PROWLARR_KEY" -sf "$url"
   elif [[ "$method" == "POST" ]]; then
-    curl -sf -X POST -H "X-Api-Key: $PROWLARR_KEY" -H "Content-Type: application/json" -d "$data" "$url"
+    arr_api header X-Api-Key "$PROWLARR_KEY" -sf -X POST -H "Content-Type: application/json" -d "$data" "$url"
   fi
 }
 

@@ -55,6 +55,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 # API Configuration
 CLIENT_ID="${TRAKT_CLIENT_ID:-}"
 CLIENT_SECRET="${TRAKT_CLIENT_SECRET:-}"
@@ -1179,7 +1182,7 @@ cmd_sync_plex() {
   
   # Get watch history from Tautulli
   local tautulli_history
-  tautulli_history=$(curl -sf "http://${CLAWARR_HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=get_history&length=500")
+  tautulli_history=$(arr_api query apikey "${TAUTULLI_KEY}" -sf "http://${CLAWARR_HOST}:8181/api/v2?cmd=get_history&length=500")
   
   if [[ -z "$tautulli_history" ]]; then
     echo "❌ Failed to fetch Tautulli history"

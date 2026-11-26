@@ -15,6 +15,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 HOST="${CLAWARR_HOST:-}"
 TAUTULLI_KEY="${TAUTULLI_KEY:-}"
 PLEX_TOKEN="${PLEX_TOKEN:-}"
@@ -45,12 +48,12 @@ tautulli_api() {
     return 1
   fi
   
-  local url="http://${HOST}:8181/api/v2?apikey=${TAUTULLI_KEY}&cmd=${cmd}"
+  local url="http://${HOST}:8181/api/v2?cmd=${cmd}"
   if [[ -n "$params" ]]; then
     url="${url}&${params}"
   fi
   
-  curl -sf "$url"
+  arr_api query apikey "$TAUTULLI_KEY" -sf "$url"
 }
 
 # Helper: call Plex API
@@ -62,7 +65,7 @@ plex_api() {
     return 1
   fi
   
-  curl -sf -H "X-Plex-Token: ${PLEX_TOKEN}" -H "Accept: application/json" \
+  arr_api header X-Plex-Token "${PLEX_TOKEN}" -sf -H "Accept: application/json" \
     "http://${HOST}:32400${endpoint}"
 }
 

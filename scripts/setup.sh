@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
 if ! command -v jq &> /dev/null; then
   echo "❌ jq is required. Install with: brew install jq (macOS) or apt install jq (Linux)"
   exit 1
@@ -218,7 +221,7 @@ verify_arr() {
   if [[ -z "$key" ]]; then return; fi
 
   local resp
-  resp=$(curl -sf -H "X-Api-Key: $key" "http://${HOST}:${port}/api/${api_ver}/system/status" 2>/dev/null || echo "")
+  resp=$(arr_api header X-Api-Key "$key" -sf "http://${HOST}:${port}/api/${api_ver}/system/status" 2>/dev/null || echo "")
 
   if [[ -n "$resp" ]]; then
     local version
